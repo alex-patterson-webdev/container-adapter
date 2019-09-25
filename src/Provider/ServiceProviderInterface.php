@@ -2,7 +2,7 @@
 
 namespace Arp\Container\Provider;
 
-use Arp\Container\Container;
+use Arp\Container\Adapter\ContainerAdapterInterface;
 use Psr\Container\ContainerExceptionInterface;
 
 /**
@@ -18,10 +18,10 @@ interface ServiceProviderInterface
      *
      * Register a collection of services with the container.
      *
-     * @param Container $container
+     * @param ContainerAdapterInterface $adapter
      *
      * @throws ContainerExceptionInterface
      */
-    public function registerServices(Container $container);
+    public function registerServices(ContainerAdapterInterface $adapter);
 
 }

@@ -2,7 +2,9 @@
 
 namespace Arp\Container\Adapter;
 
-use Psr\Container\ContainerExceptionInterface;
+use Arp\Container\Exception\NotCreatedException;
+use Arp\Container\Exception\NotFoundException;
+use Arp\Container\Exception\NotRegisteredException;
 
 /**
  * ContainerAdapterInterface
@@ -32,9 +34,24 @@ interface ContainerAdapterInterface
      *
      * @return mixed
      *
-     * @throws ContainerExceptionInterface
+     * @throws NotFoundException
      */
     public function getService($name);
+
+    /**
+     * createService
+     *
+     * Create a new service with the provided name and pass in the $options. This method provides the ability
+     * to *always* create a new instance of the requested service.
+     *
+     * @param string    $name     The name of the service to create.
+     * @param array     $options  The service creation options.
+     *
+     * @return mixed
+     *
+     * @throws NotCreatedException
+     */
+    public function createService($name, array $options);
 
     /**
      * setService
@@ -46,22 +63,36 @@ interface ContainerAdapterInterface
      *
      * @return mixed
      *
-     * @throws ContainerExceptionInterface
+     * @throws NotRegisteredException
      */
     public function setService($name, $service);
 
     /**
-     * createService
+     * setServiceFactory
      *
-     * Create a new service with the provided name and pass in the $options.
+     * Register a callable factory for the container.
      *
-     * @param string    $name     The name of the service to create.
-     * @param callable  $factory  The factory used to create the service.
-     * @param array     $options  The service creation options.
+     * @param string   $name     The name of the service to register.
+     * @param callable $factory  The factory callable responsible for creating the service.
      *
      * @return mixed
      *
-     * @throws ContainerExceptionInterface
+     * @throws NotRegisteredException
      */
-    public function createService($name, callable $factory, array $options);
+    public function setServiceFactory($name, callable $factory);
+
+    /**
+     * setServiceConfig
+     *
+     * Register a factory class name
+     *
+     * @param string    $name              The name of the service to register.
+     * @param callable  $factoryClassName  The factory callable responsible for creating the service.
+     *
+     * @return mixed
+     *
+     * @throws NotRegisteredException
+     */
+    public function setServiceFactoryConfig($name, $factoryClassName);
+
 }
