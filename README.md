@@ -12,11 +12,17 @@ Installation via [Composer](https://getcomposer.org).
     
 ## Usage
 
-We can create a PSR-11 compatible container by creating a new `Arp\Container\Container` instance and providing an concrete implementation of an 
+We can create a PSR-11 compatible container by creating a new instance of `Arp\Container\Container` and providing an concrete implementation of an 
 adapter instance.
    
-   $adapter = new MyContainerAdapter; // instance of Arp\Container\Adapter\ContainerAdapterInterface
-   $container = new Container($adapter);   
+    $adapter = new MyContainerAdapter; // instance of Arp\Container\Adapter\ContainerAdapterInterface
+    $container = new Container($adapter);   
+   
+There are a number of supporting projects that implement a range of Adapters for different containers. Please see the relevant 
+project for container specific documentation.
+
+- `alex-patterson-webdev/container-pimiple` Provides an adapter for the Symfony pimple container.
+- `alex-patterson-webdev/container-zend-service-manager` Provides an adapter for the Zend Framework Service Manager container.
    
 #### Get Services   
    
