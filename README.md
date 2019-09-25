@@ -12,7 +12,11 @@ Installation via [Composer](https://getcomposer.org).
     
 ## Usage
 
-@todo
+We can create a PSR-11 compatible container by creating a new `Arp\Container\Container` instance and providing an concrete implementation of an 
+adapter instance.
+   
+   $adapter = new MyContainerAdapter; // instance of Arp\Container\Adapter\ContainerAdapterInterface
+   $container = new Container($adapter);   
    
 #### Get Services   
    
