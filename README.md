@@ -12,20 +12,7 @@ Installation via [Composer](https://getcomposer.org).
     
 ## Usage
 
-The container implementation `Arp\Container\Container` requires an adapter to function; The module ships with the following implementations.
-
-- `Arp\Container\Adapter\PimpleContainer` adapter for the [Pimple\Container](https://pimple.symfony.com/).
-- `Arp\Container\Adapter\ZendServiceManager` adapter for the [Zend\ServiceManager\ServiceManager](https://github.com/zendframework/zend-servicemanager/)
-
-Assuming we are using Pimple, we can create our container in the following manor.
-    
-    use Arp\Container\Container;
-    use Arp\Container\Adapter\Pimple;
-    
-    $pimpleContainer = new \Pimple\Container;
-    $pimpleAdapter   = new Pimple($pimpleContainer);
-    
-    $container = new Container($pimpleAdapter);
+@todo
    
 #### Get Services   
    
