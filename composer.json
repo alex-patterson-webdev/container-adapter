@@ -1,7 +1,7 @@
 {
   "name" : "alex-patterson-webdev/container",
   "description": "PSR container adapter",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "authors": [
     {
       "name": "Alex Patterson",
@@ -9,11 +9,11 @@
     }
   ],
   "require": {
-    "php" : ">=5.6 || >=7.0",
+    "php" : ">=7.2",
     "psr/container" : "^1"
   },
   "require-dev": {
-    "phpunit/phpunit" : "^5.7"
+    "phpunit/phpunit" : "^8"
   },
   "autoload": {
     "psr-4": {
