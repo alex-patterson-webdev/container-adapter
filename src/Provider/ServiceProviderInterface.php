@@ -23,5 +23,4 @@ interface ServiceProviderInterface
      * @throws ContainerExceptionInterface
      */
     public function registerServices(ContainerAdapterInterface $adapter);
-
 }

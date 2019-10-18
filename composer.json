@@ -1,7 +1,7 @@
 {
   "name" : "alex-patterson-webdev/container",
   "description": "PSR container adapter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "authors": [
     {
       "name": "Alex Patterson",

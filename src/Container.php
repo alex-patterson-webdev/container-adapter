@@ -24,7 +24,7 @@ class Container implements ContainerInterface
     protected $adapter;
 
     /**
-     * __construct.
+     * __construct
      *
      * @param ContainerAdapterInterface $adapter
      */
@@ -34,8 +34,6 @@ class Container implements ContainerInterface
     }
 
     /**
-     * has
-     *
      * Returns true if the container can return an entry for the given identifier.
      * Returns false otherwise.
      *
@@ -52,8 +50,6 @@ class Container implements ContainerInterface
     }
 
     /**
-     * get
-     *
      * Finds an entry of the container by its identifier and returns it.
      *
      * @param string  $name  Identifier of the entry to look for.
@@ -69,8 +65,6 @@ class Container implements ContainerInterface
     }
 
     /**
-     * registerServices
-     *
      * Register a collection of services defined in the provided service provider.
      *
      * @param ServiceProviderInterface $serviceProvider
