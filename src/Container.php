@@ -75,5 +75,5 @@ class Container implements ContainerInterface
     {
         $serviceProvider->registerServices($this->adapter);
     }
-
 }
+

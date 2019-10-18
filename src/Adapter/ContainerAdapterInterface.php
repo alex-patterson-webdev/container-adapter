@@ -21,7 +21,7 @@ interface ContainerAdapterInterface
      *
      * @return bool
      */
-    public function hasService($name);
+    public function hasService(string $name) : bool;
 
     /**
      * Return a service matching the provided name.
@@ -32,7 +32,7 @@ interface ContainerAdapterInterface
      *
      * @throws NotFoundException
      */
-    public function getService($name);
+    public function getService(string $name);
 
     /**
      * createService
@@ -40,14 +40,14 @@ interface ContainerAdapterInterface
      * Create a new service with the provided name and pass in the $options. This method provides the ability
      * to *always* create a new instance of the requested service.
      *
-     * @param string    $name     The name of the service to create.
-     * @param array     $options  The service creation options.
+     * @param string $name     The name of the service to create.
+     * @param array  $options  The service creation options.
      *
      * @return mixed
      *
      * @throws NotCreatedException
      */
-    public function createService($name, array $options);
+    public function createService(string $name, array $options);
 
     /**
      * Set a new service on the container.
@@ -59,7 +59,7 @@ interface ContainerAdapterInterface
      *
      * @throws NotRegisteredException
      */
-    public function setService($name, $service);
+    public function setService(string $name, $service);
 
     /**
      * Register a callable factory for the container.
@@ -71,18 +71,17 @@ interface ContainerAdapterInterface
      *
      * @throws NotRegisteredException
      */
-    public function setServiceFactory($name, callable $factory);
+    public function setServiceFactory(string $name, callable $factory);
 
     /**
      * Register a factory class name
      *
-     * @param string    $name              The name of the service to register.
-     * @param callable  $factoryClassName  The factory callable responsible for creating the service.
+     * @param string  $name              The name of the service to register.
+     * @param string  $factoryClassName  The factory class name responsible for creating the service.
      *
      * @return mixed
      *
      * @throws NotRegisteredException
      */
-    public function setServiceFactoryConfig($name, $factoryClassName);
-
+    public function setServiceFactoryConfig(string $name, string $factoryClassName);
 }

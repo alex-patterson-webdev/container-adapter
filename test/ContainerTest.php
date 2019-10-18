@@ -4,7 +4,7 @@ namespace ArpTest\Container\ContainerTest;
 
 use Arp\Container\Container;
 use Arp\Container\Adapter\ContainerAdapterInterface;
-use PHPUnit_Framework_MockObject_MockObject as MockObject;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
@@ -28,7 +28,7 @@ class ContainerTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp() : void
     {
         $this->adapter = $this->getMockForAbstractClass(ContainerAdapterInterface::class);
     }
@@ -47,4 +47,41 @@ class ContainerTest extends TestCase
         $this->assertInstanceOf(ContainerInterface::class, $container);
     }
 
+    /**
+     * Ensure that registered services will return true when calling has().
+     *
+     * @test
+     */
+    public function testHasReturnsTrueForRegisteredService()
+    {
+        $container = new Container($this->adapter);
+
+        $serviceName = 'TestService';
+
+        $this->adapter->expects($this->once())
+            ->method('hasService')
+            ->with($serviceName)
+            ->willReturn(true);
+
+        $this->assertTrue($container->has($serviceName));
+    }
+
+    /**
+     * Ensure that non-registered services will return false when calling has().
+     *
+     * @test
+     */
+    public function testHasReturnsFalseForNonRegisteredService()
+    {
+        $container = new Container($this->adapter);
+
+        $serviceName = 'TestService';
+
+        $this->adapter->expects($this->once())
+            ->method('hasService')
+            ->with($serviceName)
+            ->willReturn(false);
+
+        $this->assertFalse($container->has($serviceName));
+    }
 }
