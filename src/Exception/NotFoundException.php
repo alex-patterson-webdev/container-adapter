@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Arp\Container\Exception;
 
 use Psr\Container\NotFoundExceptionInterface;

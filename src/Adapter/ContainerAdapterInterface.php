@@ -15,8 +15,6 @@ use Arp\Container\Exception\NotRegisteredException;
 interface ContainerAdapterInterface
 {
     /**
-     * hasService
-     *
      * Check if a service is registered with this name.
      *
      * @param string $name  The name of the service to check.
@@ -26,8 +24,6 @@ interface ContainerAdapterInterface
     public function hasService($name);
 
     /**
-     * getService
-     *
      * Return a service matching the provided name.
      *
      * @param string $name The name of the service to return.
@@ -54,8 +50,6 @@ interface ContainerAdapterInterface
     public function createService($name, array $options);
 
     /**
-     * setService
-     *
      * Set a new service on the container.
      *
      * @param string $name     The name of the service to set.
@@ -68,8 +62,6 @@ interface ContainerAdapterInterface
     public function setService($name, $service);
 
     /**
-     * setServiceFactory
-     *
      * Register a callable factory for the container.
      *
      * @param string   $name     The name of the service to register.
@@ -82,8 +74,6 @@ interface ContainerAdapterInterface
     public function setServiceFactory($name, callable $factory);
 
     /**
-     * setServiceConfig
-     *
      * Register a factory class name
      *
      * @param string    $name              The name of the service to register.
