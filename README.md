@@ -8,7 +8,7 @@ A PSR-11 based dependency injection component that provides a generic interface 
 
 Installation via [Composer](https://getcomposer.org).
 
-    require alex-patterson-webdev/container ^1
+    require alex-patterson-webdev/container ^2
     
 ## Usage
 
