@@ -5,6 +5,7 @@ namespace Arp\Container\Adapter;
 use Arp\Container\Exception\NotCreatedException;
 use Arp\Container\Exception\NotFoundException;
 use Arp\Container\Exception\NotRegisteredException;
+use Psr\Container\ContainerExceptionInterface;
 
 /**
  * ContainerAdapterInterface
@@ -20,6 +21,8 @@ interface ContainerAdapterInterface
      * @param string $name  The name of the service to check.
      *
      * @return bool
+     *
+     * @throws ContainerExceptionInterface
      */
     public function hasService(string $name) : bool;
 
