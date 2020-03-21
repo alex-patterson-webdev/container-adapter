@@ -1,27 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Arp\Container;
 
 use Arp\Container\Adapter\ContainerAdapterInterface;
+use Arp\Container\Adapter\Exception\AdapterException;
+use Arp\Container\Adapter\Exception\NotFoundException;
 use Arp\Container\Provider\ServiceProviderInterface;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
- * Container
- *
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package Arp\Container
  */
-class Container implements ContainerInterface
+final class Container implements ContainerInterface
 {
     /**
-     * $adapter
-     *
      * @var ContainerAdapterInterface
      */
-    protected $adapter;
+    private $adapter;
 
     /**
      * __construct
@@ -43,25 +43,37 @@ class Container implements ContainerInterface
      * @param string $name Identifier of the entry to look for.
      *
      * @return bool
+     *
+     * @throws Exception\ContainerException If the operation cannot be completed
      */
-    public function has($name)
+    public function has($name): bool
     {
-        return $this->adapter->hasService($name);
+        try {
+            return $this->adapter->hasService($name);
+        } catch (AdapterException $e) {
+            throw new Exception\ContainerException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
      * Finds an entry of the container by its identifier and returns it.
      *
-     * @param string  $name  Identifier of the entry to look for.
+     * @param string $name Identifier of the entry to look for.
      *
      * @return mixed
      *
-     * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
      */
     public function get($name)
     {
-        return $this->adapter->getService($name);
+        try {
+            return $this->adapter->getService($name);
+        } catch (NotFoundException $e) {
+            throw new Exception\NotFoundException($e->getMessage(), $e->getCode(), $e);
+        } catch (AdapterException $e) {
+            throw new Exception\ContainerException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -69,11 +81,14 @@ class Container implements ContainerInterface
      *
      * @param ServiceProviderInterface $serviceProvider
      *
+     * @return self
+     *
      * @throws ContainerExceptionInterface
      */
-    public function registerServices(ServiceProviderInterface $serviceProvider)
+    public function registerServices(ServiceProviderInterface $serviceProvider): self
     {
         $serviceProvider->registerServices($this->adapter);
+
+        return $this;
     }
 }
-

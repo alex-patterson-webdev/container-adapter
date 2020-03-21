@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Arp\Container\Provider;
 
 use Arp\Container\Adapter\ContainerAdapterInterface;
@@ -14,8 +16,6 @@ use Psr\Container\ContainerExceptionInterface;
 interface ServiceProviderInterface
 {
     /**
-     * registerServices
-     *
      * Register a collection of services with the container.
      *
      * @param ContainerAdapterInterface $adapter

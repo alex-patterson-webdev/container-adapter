@@ -1,25 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ArpTest\Container\Exception;
 
 use Arp\Container\Exception\NotFoundException;
+use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use PHPUnit\Framework\TestCase;
 
 /**
- * NotFoundExceptionTest
- *
+ * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package ArpTest\Container\Exception
  */
-class NotFoundExceptionTest extends TestCase
+final class NotFoundExceptionTest extends TestCase
 {
     /**
      * Ensure that the exception is an instance of the default PHP exception instance.
      *
-     * @test
+     * @covers \Arp\Container\Exception\NotFoundException
      */
-    public function testIsInstanceOfException()
+    public function testIsInstanceOfException(): void
     {
         $exception = new NotFoundException();
 
@@ -29,9 +30,9 @@ class NotFoundExceptionTest extends TestCase
     /**
      * Ensure that the exception implements ContainerExceptionInterface.
      *
-     * @test
+     * @covers \Arp\Container\Exception\NotFoundException
      */
-    public function testImplementsContainerExceptionInterface()
+    public function testImplementsContainerExceptionInterface(): void
     {
         $exception = new NotFoundException();
 
@@ -41,9 +42,9 @@ class NotFoundExceptionTest extends TestCase
     /**
      * Ensure that the exception implements NotFoundExceptionInterface.
      *
-     * @test
+     * @covers \Arp\Container\Exception\NotFoundException
      */
-    public function testImplementsNotFoundExceptionInterface()
+    public function testImplementsNotFoundExceptionInterface(): void
     {
         $exception = new NotFoundException();
 

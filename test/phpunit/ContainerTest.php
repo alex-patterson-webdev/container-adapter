@@ -1,21 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ArpTest\Container\ContainerTest;
 
-use Arp\Container\Container;
 use Arp\Container\Adapter\ContainerAdapterInterface;
+use Arp\Container\Container;
 use Arp\Container\Provider\ServiceProviderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 /**
- * ContainerTest
- *
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package ArpTest\Container\ContainerTest
  */
-class ContainerTest extends TestCase
+final class ContainerTest extends TestCase
 {
     /**
      * $adapter
@@ -25,23 +25,19 @@ class ContainerTest extends TestCase
     protected $adapter;
 
     /**
-     * setUp
-     *
      * @return void
      */
-    public function setUp() : void
+    public function setUp(): void
     {
         $this->adapter = $this->getMockForAbstractClass(ContainerAdapterInterface::class);
     }
 
     /**
-     * testImplementsContainerInterface
-     *
      * Ensure that the container implements the PSR
      *
-     * @test
+     * @covers \Arp\Container\Container
      */
-    public function testImplementsContainerInterface()
+    public function testImplementsContainerInterface(): void
     {
         $container = new Container($this->adapter);
 
@@ -51,18 +47,18 @@ class ContainerTest extends TestCase
     /**
      * Ensure that registered services will return true when calling has().
      *
-     * @test
+     * @covers \Arp\Container\Container::has
      */
-    public function testHasReturnsTrueForRegisteredService()
+    public function testHasReturnsTrueForRegisteredService(): void
     {
         $container = new Container($this->adapter);
 
         $serviceName = 'TestService';
 
         $this->adapter->expects($this->once())
-            ->method('hasService')
-            ->with($serviceName)
-            ->willReturn(true);
+                      ->method('hasService')
+                      ->with($serviceName)
+                      ->willReturn(true);
 
         $this->assertTrue($container->has($serviceName));
     }
@@ -70,18 +66,18 @@ class ContainerTest extends TestCase
     /**
      * Ensure that non-registered services will return false when calling has().
      *
-     * @test
+     * @covers \Arp\Container\Container::has
      */
-    public function testHasReturnsFalseForNonRegisteredService()
+    public function testHasReturnsFalseForNonRegisteredService(): void
     {
         $container = new Container($this->adapter);
 
         $serviceName = 'TestService';
 
         $this->adapter->expects($this->once())
-            ->method('hasService')
-            ->with($serviceName)
-            ->willReturn(false);
+                      ->method('hasService')
+                      ->with($serviceName)
+                      ->willReturn(false);
 
         $this->assertFalse($container->has($serviceName));
     }
@@ -89,19 +85,19 @@ class ContainerTest extends TestCase
     /**
      * Ensure that calls to get() will return a registered service from the adapter.
      *
-     * @test
+     * @covers \Arp\Container\Container::get
      */
-    public function testGetWillReturnRegisteredService()
+    public function testGetWillReturnRegisteredService(): void
     {
         $container = new Container($this->adapter);
 
         $serviceName = 'TestService';
-        $service     = new \stdClass;
+        $service = new \stdClass();
 
         $this->adapter->expects($this->once())
-            ->method('getService')
-            ->with($serviceName)
-            ->willReturn($service);
+                      ->method('getService')
+                      ->with($serviceName)
+                      ->willReturn($service);
 
         $this->assertSame($service, $container->get($serviceName));
     }
@@ -110,9 +106,9 @@ class ContainerTest extends TestCase
      * Ensure that the service provider will have the containers adapter passed to it
      * when calling registerServices().
      *
-     * @test
+     * @covers \Arp\Container\Container::registerServices
      */
-    public function testRegisterServicesWillPassAdapterToProvidedServiceProvider()
+    public function testRegisterServicesWillPassAdapterToProvidedServiceProvider(): void
     {
         $container = new Container($this->adapter);
 
@@ -120,9 +116,9 @@ class ContainerTest extends TestCase
         $serviceProvider = $this->getMockForAbstractClass(ServiceProviderInterface::class);
 
         $serviceProvider->expects($this->once())
-            ->method('registerServices')
-            ->with($this->adapter);
+                        ->method('registerServices')
+                        ->with($this->adapter);
 
-        $container->registerServices($serviceProvider);
+        $this->assertSame($container, $container->registerServices($serviceProvider));
     }
 }

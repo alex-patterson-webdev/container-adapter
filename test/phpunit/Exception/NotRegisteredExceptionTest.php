@@ -1,24 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ArpTest\Container\Exception;
 
 use Arp\Container\Exception\NotRegisteredException;
-use Psr\Container\ContainerExceptionInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerExceptionInterface;
 
 /**
- * NotRegisteredExceptionTest
- *
+ * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package ArpTest\Container\Exception
  */
-class NotRegisteredExceptionTest extends TestCase
+final class NotRegisteredExceptionTest extends TestCase
 {
     /**
      * Ensure that the exception is an instance of the default PHP exception instance.
      *
-     * @test
+     * @covers \Arp\Container\Exception\NotRegisteredException
      */
-    public function testIsInstanceOfException()
+    public function testIsInstanceOfException(): void
     {
         $exception = new NotRegisteredException();
 
@@ -28,9 +29,9 @@ class NotRegisteredExceptionTest extends TestCase
     /**
      * Ensure that the exception implements ContainerExceptionInterface.
      *
-     * @test
+     * @covers \Arp\Container\Exception\NotRegisteredException
      */
-    public function testImplementsContainerExceptionInterface()
+    public function testImplementsContainerExceptionInterface(): void
     {
         $exception = new NotRegisteredException();
 

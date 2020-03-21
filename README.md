@@ -2,7 +2,7 @@
 
 ## About
 
-A PSR-11 based dependency injection component that provides a generic interface for service resolution and registration.
+A PSR-11 compatible Dependency Injection Container wrapper that supports generic service registration.
 
 ## Installation
 
@@ -15,7 +15,10 @@ Installation via [Composer](https://getcomposer.org).
 We can create a PSR-11 compatible container by creating a new instance of `Arp\Container\Container` and providing an concrete implementation of an 
 adapter instance.
    
-    $adapter = new MyContainerAdapter; // instance of Arp\Container\Adapter\ContainerAdapterInterface
+    use Arp\Container\Container;
+   
+    
+   
     $container = new Container($adapter);   
    
 There are a number of supporting projects that implement a range of Adapters for different containers. Please see the relevant 

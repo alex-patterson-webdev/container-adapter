@@ -1,21 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ArpTest\Container\Exception;
 
-use Psr\Container\ContainerExceptionInterface;
+use Arp\Container\Exception\NotSupportedException;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerExceptionInterface;
 
 /**
- * NotSupportedException
- *
+ * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package ArpTest\Container\Exception
  */
-class NotSupportedException extends TestCase
+final class NotSupportedExceptionTest extends TestCase
 {
     /**
      * Ensure that the exception is an instance of the default PHP exception instance.
      *
-     * @test
+     * @covers \Arp\Container\Exception\NotSupportedException
      */
     public function testIsInstanceOfException()
     {
@@ -27,7 +29,7 @@ class NotSupportedException extends TestCase
     /**
      * Ensure that the exception implements ContainerExceptionInterface.
      *
-     * @test
+     * @covers \Arp\Container\Exception\NotSupportedException
      */
     public function testImplementsContainerExceptionInterface()
     {
