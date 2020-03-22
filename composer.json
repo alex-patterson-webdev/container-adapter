@@ -16,6 +16,7 @@
   "require": {
     "php" : ">=7.2",
     "psr/container" : "^1",
+    "psr/log" : "^1",
     "alex-patterson-webdev/factory": "^1"
   },
   "require-dev": {
