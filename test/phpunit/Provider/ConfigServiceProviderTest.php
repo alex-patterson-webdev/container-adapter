@@ -155,11 +155,14 @@ final class ConfigServiceProviderTest extends TestCase
         $factories = $config['factories'] ?? [];
         $services  = $config['services']  ?? [];
 
-        $setFactoryArgs = [];
-        $setServiceArgs = [];
+        $setFactoryArgs = $setServiceArgs = $setClassArgs = [];
 
         foreach ($factories as $name => $factory) {
-            $setFactoryArgs[] = [$name, $factory];
+            if (is_string($factory)) {
+                $setClassArgs[] = [$name, $factory];
+            } else {
+                $setFactoryArgs[] = [$name, $factory];
+            }
         }
         foreach ($services as $name => $service) {
             $setServiceArgs[] = [$name, $service];
@@ -168,6 +171,10 @@ final class ConfigServiceProviderTest extends TestCase
         $adapter->expects($this->exactly(count($setFactoryArgs)))
                 ->method('setFactory')
                 ->withConsecutive(...$setFactoryArgs);
+
+        $adapter->expects($this->exactly(count($setClassArgs)))
+                ->method('setFactoryClass')
+                ->withConsecutive(...$setClassArgs);
 
         $adapter->expects($this->exactly(count($setServiceArgs)))
                 ->method('setService')
@@ -182,37 +189,39 @@ final class ConfigServiceProviderTest extends TestCase
     public function getRegisterServicesData(): array
     {
         return [
-            [
-                [], // empty config test
-            ],
+//            [
+//                [], // empty config test
+//            ],
+//
+//            [
+//                [
+//                    'factories' => [
+//                        'FooService' => static function () {
+//                            return 'Hi';
+//                        },
+//                    ],
+//                ]
+//            ],
+//
+//            [
+//                [
+//                    'services' => [
+//                        'FooService' => new \stdClass(),
+//                        'BarService' => new \stdClass(),
+//                        'Baz' => 123,
+//                    ],
+//                ],
+//            ],
 
             [
                 [
                     'factories' => [
-                        'FooService' => static function () {
-                            return 'Hi';
+                        'BazStringService' => 'Hello',
+                        'Bar' => static function () {
+                            return 'Test';
                         },
+                        'Foo' => 'FooFactory',
                     ],
-                ]
-            ],
-
-            [
-                [
-                    'services' => [
-                        'FooService' => new \stdClass(),
-                        'BarService' => new \stdClass(),
-                        'Baz' => 123,
-                    ],
-                ],
-            ],
-
-            [
-                'factories' => [
-                    'BazStringService' => 'Hello',
-                    'Bar' => static function () {
-                        return 'Test';
-                    },
-                    'Foo' => 'FooFactory',
                 ],
             ],
         ];
