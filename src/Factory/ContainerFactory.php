@@ -56,6 +56,6 @@ class ContainerFactory implements FactoryInterface
             ));
         }
 
-        return new Container($config['adapter'], $logger);
+        return new Container($adapter, $logger);
     }
 }
