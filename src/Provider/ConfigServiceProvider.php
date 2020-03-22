@@ -53,7 +53,9 @@ final class ConfigServiceProvider implements ServiceProviderInterface
                     }
                     $adapter->setFactoryClass($name, $factory);
                     continue;
-                } elseif (is_callable($factory)) {
+                }
+
+                if (is_callable($factory)) {
                     $adapter->setFactory($name, $factory);
                     continue;
                 }

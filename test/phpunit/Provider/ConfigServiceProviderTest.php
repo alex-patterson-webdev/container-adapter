@@ -189,29 +189,29 @@ final class ConfigServiceProviderTest extends TestCase
     public function getRegisterServicesData(): array
     {
         return [
-//            [
-//                [], // empty config test
-//            ],
-//
-//            [
-//                [
-//                    'factories' => [
-//                        'FooService' => static function () {
-//                            return 'Hi';
-//                        },
-//                    ],
-//                ]
-//            ],
-//
-//            [
-//                [
-//                    'services' => [
-//                        'FooService' => new \stdClass(),
-//                        'BarService' => new \stdClass(),
-//                        'Baz' => 123,
-//                    ],
-//                ],
-//            ],
+            [
+                [], // empty config test
+            ],
+
+            [
+                [
+                    'factories' => [
+                        'FooService' => static function () {
+                            return 'Hi';
+                        },
+                    ],
+                ]
+            ],
+
+            [
+                [
+                    'services' => [
+                        'FooService' => new \stdClass(),
+                        'BarService' => new \stdClass(),
+                        'Baz' => 123,
+                    ],
+                ],
+            ],
 
             [
                 [
