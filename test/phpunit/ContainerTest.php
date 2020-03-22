@@ -118,6 +118,8 @@ final class ContainerTest extends TestCase
      * when calling registerServices().
      *
      * @covers \Arp\Container\Container::registerServices
+     *
+     * @throws ContainerException
      */
     public function testRegisterServicesWillPassAdapterToProvidedServiceProvider(): void
     {
