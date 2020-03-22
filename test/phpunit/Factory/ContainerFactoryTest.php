@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace ArpTest\Container\Factory;
 
 use Arp\Container\Adapter\ContainerAdapterInterface;
+use Arp\Container\Container;
 use Arp\Container\Factory\ContainerFactory;
 use Arp\Factory\Exception\FactoryException;
 use Arp\Factory\FactoryInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -102,5 +105,32 @@ final class ContainerFactoryTest extends TestCase
         ));
 
         $factory->create($config);
+    }
+
+    /**
+     * Assert that a valid Container is created when providing configuration options to create().
+     *
+     * @covers \Arp\Container\Factory\ContainerFactory::create
+     *
+     * @throws FactoryException
+     */
+    public function testCreateWillReturnContainer(): void
+    {
+        $factory = new ContainerFactory();
+
+        /** @var ContainerAdapterInterface|MockObject $adapter */
+        $adapter = $this->getMockForAbstractClass(ContainerAdapterInterface::class);
+
+        /** @var LoggerInterface $logger */
+        $logger = $this->getMockForAbstractClass(LoggerInterface::class);
+
+        $config = [
+            'adapter' => $adapter,
+            'logger' => $logger,
+        ];
+
+        $container = $factory->create($config);
+
+        $this->assertInstanceOf(ContainerInterface::class, $container);
     }
 }
