@@ -84,13 +84,13 @@ final class Container implements ContainerInterface
         } catch (NotFoundException $e) {
             $errorMessage = sprintf('The service \'%s\' could not be found', $name);
 
-            $this->logger->debug($errorMessage, ['exception' => $e, 'name' => $name]);
+            $this->logger->error($errorMessage, ['exception' => $e, 'name' => $name]);
 
             throw new Exception\NotFoundException($errorMessage, $e->getCode(), $e);
         } catch (AdapterException $e) {
             $errorMessage = sprintf('The get() failed for service \'%s\' : %s', $name, $e->getMessage());
 
-            $this->logger->debug($errorMessage, ['exception' => $e, 'name' => $name]);
+            $this->logger->error($errorMessage, ['exception' => $e, 'name' => $name]);
 
             throw new Exception\ContainerException($errorMessage, $e->getCode(), $e);
         }
@@ -112,7 +112,7 @@ final class Container implements ContainerInterface
         } catch (ServiceProviderException $e) {
             $errorMessage = sprintf('Failed to register service provider : %s', $e->getMessage());
 
-            $this->logger->debug($errorMessage, ['exception' => $e, 'serviceProvider' => get_class($serviceProvider)]);
+            $this->logger->error($errorMessage, ['exception' => $e, 'serviceProvider' => get_class($serviceProvider)]);
 
             throw new ContainerException($errorMessage, $e->getCode(), $e);
         }
