@@ -1,8 +1,11 @@
+[![Build Status](https://travis-ci.com/alex-patterson-webdev/container.svg?branch=master)](https://travis-ci.com/alex-patterson-webdev/container)
+[![codecov](https://codecov.io/gh/alex-patterson-webdev/container/branch/master/graph/badge.svg)](https://codecov.io/gh/alex-patterson-webdev/container)
+
 # Arp\Container
 
 ## About
 
-A PSR-11 based dependency injection component that provides a generic interface for service resolution and registration.
+A PSR-11 compatible Dependency Injection Container implementation, supporting generic service registration for popular DI containers.
 
 ## Installation
 
@@ -10,111 +13,122 @@ Installation via [Composer](https://getcomposer.org).
 
     require alex-patterson-webdev/container ^1
     
-## Usage
+### Implementations
 
-We can create a PSR-11 compatible container by creating a new instance of `Arp\Container\Container` and providing an concrete implementation of an 
-adapter instance.
+There are a number of projects that implement the interfaces provided in this library. Please see the relevant project for 
+container specific documentation.
+
+- [alex-patterson-webdev/container-array](https://github.com/alex-patterson-webdev/container-array)
+Adapter for a simple array based container that stores services and factories in PHP arrays
+
+- (In DEV) [alex-patterson-webdev/container-pimple](https://github.com/alex-patterson-webdev/container-pimple)
+Adapter for the Symfony Pimple container.
+
+- (In DEV) alex-patterson-webdev/container-laminas : Adapter for the Laminas Service Manager
+Adapter for the Laminas Service Manager (Formally Zend 3).
+
+## The Container
+
+The PSR-11 compatible container is `Arp\Container\Container`. Internally the `Container` class proxies its method calls 
+to an adapter class implementing `Arp\Container\Adapter\ContainerAdapterInterface`.
+
+To create the container, the library provides a default factory class, `Arp\Container\Factory\ContainerFactory`.
+ 
+    use Arp\Container\Container;
+    use Arp\Container\Factory\ContainerFactory;
    
-    $adapter = new MyContainerAdapter; // instance of Arp\Container\Adapter\ContainerAdapterInterface
-    $container = new Container($adapter);   
-   
-There are a number of supporting projects that implement a range of Adapters for different containers. Please see the relevant 
-project for container specific documentation.
-
-- `alex-patterson-webdev/container-pimple` Provides an adapter for the Symfony pimple container.
-- `alex-patterson-webdev/container-zend-service-manager` Provides an adapter for the Zend Framework Service Manager container.
-   
-### Get Services   
-   
-We can now access the container's services via `get($name)`.
-
-    $service = $container->get($name);
-
-### Check if services are registered
-
-And check if services are registered with `has($name)`.
-
-    $container->has('FooService'); // bool
+    $config = [
+        'adapter' => new \My\Container\Adapter\Foo(),
+    ];
+    $container = (new ContainerFactory())->create($config);
     
-### Service Providers
+    if ($container->has('Foo')) {
+        $fooService = $container->get('Foo');
+    }    
+    
+## Container Adapters    
+   
+Container Adapters unify the different approaches many popular dependency injection containers take when implementing 
+service registration.
 
-The PSR-11 specification intentionally omits the registration of services. This is because there are already a number of popular containers
-that use different strategies. Generally, there are two approaches, using configuration files and runtime registration.  
+The adapter interface exposes a number of basic methods that they all share
+    
+    namespace Arp\Container\Adpater;
 
-To provide a generic interface for all containers this module provides the `Arp\Container\Provider\ServiceProviderInterface` interface.
-The provider accepts a `Arp\Container\Adapter\ContainerAdapterInterface` which abstracts the service registration for concrete containers. 
+    interface ContainerAdapterInterface
+    {
+        public function hasService(string $name): bool;
+        public function getService(string $name);
+        public function setService(string $name, $service): self;
+        public function setFactory(string $name, callable $factory): self;
+    }
 
+A concrete adapter class can implement their own logic in the  `setService()` and `setFactory()` to allow the service registration 
+methods to differ between different DI container implementations. The basic methods include :
+
+#### Registering a service factory
+
+Service factories are any PHP `callable` type. When retrieving services from the container the callable will be invoked 
+and the container will be injected.
+
+Factories can be any PHP `callable`.
+
+    use Psr\Container\ContainerInterface;
+    
+    $adapter->setServiceFactory('FooService', static function(ContainerInterface $container) {
+        return new FooService();
+    });
+
+#### Registering an existing service
+
+We can also directly set a value using `setService()`, which can be used for service that are already created or that do not
+require a factory.
+
+    $adapter->setService('FooService', new FooService());
+    $adapter->setService('SpecialNumber', 12345);
+    
+    $fooService = $adapter->get('FooService');
+    $specialNumber = $adapter->getService('FooService');
+
+#### Other features
+
+Some containers support more service registration features than others, in these cases there are additional adapter interfaces.
+
+- `Arp\Container\Adapter\FactoryClassAwareInterface`
+
+Containers that allow registration of service factory classes
+
+- `Arp\Container\Adapter\BuildAwareInterface`
+
+Containers that allow new instances to be created based on passed configuration options
+   
+## Service Providers
+
+A service provider is any class implementing `Arp\Container\Provider\ServiceProviderInterface`. The interface provides a single place
+to interact with the container adapter directly to register services.
+
+    use Arp\Container\Provider\ServiceProviderInterface;
+    use Arp\Container\Adapter\ContainerAdapterInterface;
+    
     class MyServiceProvider implements ServiceProviderInterface
     {
         public function registerServices(ContainerAdapterInterface $adapter)
         {
-            // .... use the adapter to register services on the container
-            $adapter->setService('FooService', function($container) {
-                return new FooService();
-            });
-            
-            $adapter->setService('BarService', function($container) {
+            $adapter->setService('Hello', new \stdClass());
+
+            $adapter->setFactory('BarService', function($container) {
                 return new BarService();
             });
         }
     }
     
-We can then  pass the service provider to the container instance to have the required services registered.
+The registration of the service We can then pass the service provider to the container and fetch our services.
 
-    $container->registerServices(new MyServiceProvider());   
+    // @var \Arp\Container\Container $container
+    $container->registerServices(new MyServiceProvider());    
 
-There a three methods of `ContainerAdapterInterface` that provide us the ability to register different types of services
+## Unit Tests
 
-### Created Services
+Unit test using PHPUnit 8
 
-The simplest services to register are objects that are already created.
-
-    $fooService = new FooService();
-    $adapter->setService('FooService', $fooService);
-
-When calling `$container->get('FooService')` the container will return the `FooService`.    
-
-### Service Factory
-
-Factories allow a service to registered with the container with a `callable` factory that will resolve the service 
-instance when it is first requested via `get()`, this prevents the need to create services that are never used.
-
-Factories can be any PHP `callable`.
-
-    $adapter->setServiceFactory('FooService', function() {
-        return new FooService();
-    });
-    
-Or a class implementing an `__invoke()` method.    
-    
-    class FooServiceFactory
-    {
-        public function __invoke()
-        {
-            return new FooService();
-        }
-    }
-    
-    $adapter->setServiceFactory('FooService', new FooServiceFactory);
-   
-When our container creates our service, we can also use it to resolve other dependencies based on configuration options.       
-   
-    $adapter->setServiceFactory('FooService', function (Container $container) {
-        return new FooService(
-            $container->get('BarService'),
-            $container->get($options['test'])
-        );
-    });
-    
-### Service Factory Configuration
-        
-Using factory class names adds another level of optimization, by delaying the need to create the factory class before it is used. 
-This can be useful in applications that have a large number of service factories to register or share.
-
-    $adapter->setServiceFactoryConfig('FooService', 'App\Foo\Factory\FooServiceFactory');
-        
-### Tests
-
-Unit test cases can be run using PHP unit.
-
-    php vendor/bin/phpunit   
+    php vendor/bin/phpunit

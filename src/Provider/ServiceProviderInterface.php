@@ -1,26 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Arp\Container\Provider;
 
 use Arp\Container\Adapter\ContainerAdapterInterface;
-use Psr\Container\ContainerExceptionInterface;
+use Arp\Container\Provider\Exception\ServiceProviderException;
 
 /**
- * ServiceProviderInterface
- *
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package Arp\Container\Provider
  */
 interface ServiceProviderInterface
 {
     /**
-     * registerServices
-     *
      * Register a collection of services with the container.
      *
      * @param ContainerAdapterInterface $adapter
      *
-     * @throws ContainerExceptionInterface
+     * @throws ServiceProviderException
      */
-    public function registerServices(ContainerAdapterInterface $adapter);
+    public function registerServices(ContainerAdapterInterface $adapter): void;
 }
