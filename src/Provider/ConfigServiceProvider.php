@@ -29,7 +29,13 @@ final class ConfigServiceProvider implements ServiceProviderInterface
         $this->config = $config;
     }
 
-
+    /**
+     * Register services with the container adapter
+     *
+     * @param ContainerAdapterInterface $adapter The adapter that should be registered with
+     *
+     * @throws ServiceProviderException If the service registration fails
+     */
     public function registerServices(ContainerAdapterInterface $adapter): void
     {
         try {
