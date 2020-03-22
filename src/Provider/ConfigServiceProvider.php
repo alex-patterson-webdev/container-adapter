@@ -52,16 +52,19 @@ final class ConfigServiceProvider implements ServiceProviderInterface
                         throw new NotSupportedException($exceptionMessage);
                     }
                     $adapter->setFactoryClass($name, $factory);
-                } elseif (! is_callable($factory)) {
-                    $exceptionMessage = sprintf(
-                        'Service factories must be of type \'callable\'; \'%s\' provided for service \'%s\'',
-                        (is_object($factory) ? get_class($factory) : gettype($factory)),
-                        $name
-                    );
-
-                    throw new ServiceProviderException($exceptionMessage);
+                    continue;
+                } elseif (is_callable($factory)) {
+                    $adapter->setFactory($name, $factory);
+                    continue;
                 }
-                $adapter->setFactory($name, $factory);
+
+                $exceptionMessage = sprintf(
+                    'Service factories must be of type \'callable\'; \'%s\' provided for service \'%s\'',
+                    (is_object($factory) ? get_class($factory) : gettype($factory)),
+                    $name
+                );
+
+                throw new ServiceProviderException($exceptionMessage);
             }
 
             $services = $this->config['services'] ?? [];

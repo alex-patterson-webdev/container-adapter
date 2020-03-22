@@ -187,10 +187,32 @@ final class ConfigServiceProviderTest extends TestCase
             ],
 
             [
+                [
+                    'factories' => [
+                        'FooService' => static function () {
+                            return 'Hi';
+                        },
+                    ],
+                ]
+            ],
+
+            [
+                [
+                    'services' => [
+                        'FooService' => new \stdClass(),
+                        'BarService' => new \stdClass(),
+                        'Baz' => 123,
+                    ],
+                ],
+            ],
+
+            [
                 'factories' => [
-                    'FooService' => static function () {
-                        return 'Hi';
+                    'BazStringService' => 'Hello',
+                    'Bar' => static function () {
+                        return 'Test';
                     },
+                    'Foo' => 'FooFactory',
                 ],
             ],
         ];
