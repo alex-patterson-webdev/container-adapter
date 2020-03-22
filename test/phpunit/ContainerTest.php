@@ -11,6 +11,7 @@ use Arp\Container\Provider\ServiceProviderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
@@ -24,11 +25,18 @@ final class ContainerTest extends TestCase
     private $adapter;
 
     /**
+     * @var LoggerInterface|MockObject
+     */
+    private $logger;
+
+    /**
      * @return void
      */
     public function setUp(): void
     {
         $this->adapter = $this->getMockForAbstractClass(ContainerAdapterInterface::class);
+
+        $this->logger = $this->getMockForAbstractClass(LoggerInterface::class);
     }
 
     /**
@@ -38,7 +46,7 @@ final class ContainerTest extends TestCase
      */
     public function testImplementsContainerInterface(): void
     {
-        $container = new Container($this->adapter);
+        $container = new Container($this->adapter, $this->logger);
 
         $this->assertInstanceOf(ContainerInterface::class, $container);
     }
@@ -52,7 +60,7 @@ final class ContainerTest extends TestCase
      */
     public function testHasReturnsTrueForRegisteredService(): void
     {
-        $container = new Container($this->adapter);
+        $container = new Container($this->adapter, $this->logger);
 
         $serviceName = 'TestService';
 
@@ -73,7 +81,7 @@ final class ContainerTest extends TestCase
      */
     public function testHasReturnsFalseForNonRegisteredService(): void
     {
-        $container = new Container($this->adapter);
+        $container = new Container($this->adapter, $this->logger);
 
         $serviceName = 'TestService';
 
@@ -92,7 +100,7 @@ final class ContainerTest extends TestCase
      */
     public function testGetWillReturnRegisteredService(): void
     {
-        $container = new Container($this->adapter);
+        $container = new Container($this->adapter, $this->logger);
 
         $serviceName = 'TestService';
         $service = new \stdClass();
@@ -113,7 +121,7 @@ final class ContainerTest extends TestCase
      */
     public function testRegisterServicesWillPassAdapterToProvidedServiceProvider(): void
     {
-        $container = new Container($this->adapter);
+        $container = new Container($this->adapter, $this->logger);
 
         /** @var ServiceProviderInterface|MockObject $serviceProvider */
         $serviceProvider = $this->getMockForAbstractClass(ServiceProviderInterface::class);
