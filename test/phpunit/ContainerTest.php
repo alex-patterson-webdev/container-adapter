@@ -6,6 +6,7 @@ namespace ArpTest\Container\ContainerTest;
 
 use Arp\Container\Adapter\ContainerAdapterInterface;
 use Arp\Container\Container;
+use Arp\Container\Exception\ContainerException;
 use Arp\Container\Provider\ServiceProviderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -18,11 +19,9 @@ use Psr\Container\ContainerInterface;
 final class ContainerTest extends TestCase
 {
     /**
-     * $adapter
-     *
      * @var ContainerAdapterInterface|MockObject
      */
-    protected $adapter;
+    private $adapter;
 
     /**
      * @return void
@@ -48,6 +47,8 @@ final class ContainerTest extends TestCase
      * Ensure that registered services will return true when calling has().
      *
      * @covers \Arp\Container\Container::has
+     *
+     * @throws ContainerException
      */
     public function testHasReturnsTrueForRegisteredService(): void
     {
@@ -67,6 +68,8 @@ final class ContainerTest extends TestCase
      * Ensure that non-registered services will return false when calling has().
      *
      * @covers \Arp\Container\Container::has
+     *
+     * @throws ContainerException
      */
     public function testHasReturnsFalseForNonRegisteredService(): void
     {
