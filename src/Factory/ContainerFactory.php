@@ -8,6 +8,8 @@ use Arp\Container\Adapter\ContainerAdapterInterface;
 use Arp\Container\Container;
 use Arp\Factory\Exception\FactoryException;
 use Arp\Factory\FactoryInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
@@ -27,6 +29,7 @@ class ContainerFactory implements FactoryInterface
     public function create(array $config = []): Container
     {
         $adapter = $config['adapter'] ?? null;
+        $logger  = $config['logger']  ?? new NullLogger();
 
         if (null === $adapter) {
             throw new FactoryException(sprintf(
@@ -44,6 +47,15 @@ class ContainerFactory implements FactoryInterface
             ));
         }
 
-        return new Container($config['adapter']);
+        if (! $logger instanceof LoggerInterface) {
+            throw new FactoryException(sprintf(
+                'The \'logger\' configuration option must be a object of type \'%s\'; \'%s\' provided in \'%s\'',
+                LoggerInterface::class,
+                (is_object($logger) ? $logger : gettype($logger)),
+                static::class
+            ));
+        }
+
+        return new Container($config['adapter'], $logger);
     }
 }
