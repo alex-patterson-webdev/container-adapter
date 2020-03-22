@@ -10,7 +10,7 @@ use Arp\Container\Adapter\Exception\AdapterException;
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package Arp\Container\Adapter
  */
-interface AliasAwareInterface
+interface AliasAwareInterface extends ContainerAdapterInterface
 {
     /**
      * Set an alias for a given service

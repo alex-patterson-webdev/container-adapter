@@ -71,7 +71,7 @@ final class ConfigServiceProvider implements ServiceProviderInterface
             }
         } catch (ServiceProviderException $e) {
             throw $e;
-        } catch (\Throwable $e) {
+        } catch (AdapterException $e) {
             throw new ServiceProviderException(
                 sprintf('Failed to register adapter services : %s', $e->getMessage()),
                 $e->getCode(),
