@@ -29,7 +29,13 @@ final class ConfigServiceProvider implements ServiceProviderInterface
         $this->config = $config;
     }
 
-
+    /**
+     * Register services with the container adapter
+     *
+     * @param ContainerAdapterInterface $adapter The adapter that should be registered with
+     *
+     * @throws ServiceProviderException If the service registration fails
+     */
     public function registerServices(ContainerAdapterInterface $adapter): void
     {
         try {
@@ -46,16 +52,21 @@ final class ConfigServiceProvider implements ServiceProviderInterface
                         throw new NotSupportedException($exceptionMessage);
                     }
                     $adapter->setFactoryClass($name, $factory);
-                } elseif (! is_callable($factory)) {
-                    $exceptionMessage = sprintf(
-                        'Service factories must be of type \'callable\'; \'%s\' provided for service \'%s\'',
-                        (is_object($factory) ? get_class($factory) : gettype($factory)),
-                        $name
-                    );
-
-                    throw new ServiceProviderException($exceptionMessage);
+                    continue;
                 }
-                $adapter->setFactory($name, $factory);
+
+                if (is_callable($factory)) {
+                    $adapter->setFactory($name, $factory);
+                    continue;
+                }
+
+                $exceptionMessage = sprintf(
+                    'Service factories must be of type \'callable\'; \'%s\' provided for service \'%s\'',
+                    (is_object($factory) ? get_class($factory) : gettype($factory)),
+                    $name
+                );
+
+                throw new ServiceProviderException($exceptionMessage);
             }
 
             $services = $this->config['services'] ?? [];
@@ -65,7 +76,7 @@ final class ConfigServiceProvider implements ServiceProviderInterface
             }
         } catch (ServiceProviderException $e) {
             throw $e;
-        } catch (\Throwable $e) {
+        } catch (AdapterException $e) {
             throw new ServiceProviderException(
                 sprintf('Failed to register adapter services : %s', $e->getMessage()),
                 $e->getCode(),

@@ -10,7 +10,7 @@ use Arp\Container\Adapter\Exception\AdapterException;
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package Arp\Container\Adapter
  */
-interface BuildAwareInterface
+interface BuildAwareInterface extends ContainerAdapterInterface
 {
     /**
      * Create a new instance of requested service
