@@ -16,7 +16,7 @@ interface AliasAwareInterface
      * Set an alias for a given service
      *
      * @param string $alias The name of the alias to set
-     * @param string $name The name of the service that
+     * @param string $name  The name of the service that
      *
      * @return ContainerAdapterInterface
      *

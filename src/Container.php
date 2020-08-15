@@ -24,16 +24,16 @@ final class Container implements ContainerInterface
     /**
      * @var ContainerAdapterInterface
      */
-    private $adapter;
+    private ContainerAdapterInterface $adapter;
 
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @param ContainerAdapterInterface $adapter
-     * @param LoggerInterface $logger
+     * @param LoggerInterface           $logger
      */
     public function __construct(ContainerAdapterInterface $adapter, LoggerInterface $logger)
     {
@@ -59,7 +59,7 @@ final class Container implements ContainerInterface
         try {
             return $this->adapter->hasService($name);
         } catch (AdapterException $e) {
-            $errorMessage = sprintf('The has() failed for service \'%s\' : %s', $name, $e->getMessage());
+            $errorMessage = sprintf('The has() method call failed for service \'%s\' : %s', $name, $e->getMessage());
 
             $this->logger->debug($errorMessage, ['exception' => $e, 'name' => $name]);
 
@@ -101,22 +101,23 @@ final class Container implements ContainerInterface
      *
      * @param ServiceProviderInterface $serviceProvider
      *
-     * @return self
-     *
      * @throws ContainerException
      */
-    public function registerServices(ServiceProviderInterface $serviceProvider): self
+    public function registerServices(ServiceProviderInterface $serviceProvider): void
     {
         try {
             $serviceProvider->registerServices($this->adapter);
         } catch (ServiceProviderException $e) {
-            $errorMessage = sprintf('Failed to register service provider : %s', $e->getMessage());
+            $className = get_class($serviceProvider);
+            $errorMessage = sprintf(
+                'Failed to register service provider \'%s\': %s',
+                $className,
+                $e->getMessage()
+            );
 
-            $this->logger->error($errorMessage, ['exception' => $e, 'serviceProvider' => get_class($serviceProvider)]);
+            $this->logger->error($errorMessage, ['exception' => $e, 'serviceProvider' => $className]);
 
             throw new ContainerException($errorMessage, $e->getCode(), $e);
         }
-
-        return $this;
     }
 }

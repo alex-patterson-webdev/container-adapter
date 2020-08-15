@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Arp\Container\Adapter\Exception;
 
 /**
- * NotFoundException
- *
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package Arp\Container\Adapter\Exception
  */
