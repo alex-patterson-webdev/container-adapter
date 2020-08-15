@@ -42,7 +42,7 @@ class ContainerFactory implements FactoryInterface
             throw new FactoryException(sprintf(
                 'The \'adapter\' configuration option must be a object of type \'%s\'; \'%s\' provided in \'%s\'',
                 ContainerAdapterInterface::class,
-                (is_object($adapter) ? $adapter : gettype($adapter)),
+                (is_object($adapter) ? get_class($adapter) : gettype($adapter)),
                 static::class
             ));
         }
@@ -51,7 +51,7 @@ class ContainerFactory implements FactoryInterface
             throw new FactoryException(sprintf(
                 'The \'logger\' configuration option must be a object of type \'%s\'; \'%s\' provided in \'%s\'',
                 LoggerInterface::class,
-                (is_object($logger) ? $logger : gettype($logger)),
+                (is_object($logger) ? get_class($logger) : gettype($logger)),
                 static::class
             ));
         }

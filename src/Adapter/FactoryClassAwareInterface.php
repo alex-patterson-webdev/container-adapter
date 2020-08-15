@@ -10,7 +10,7 @@ use Arp\Container\Adapter\Exception\AdapterException;
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package Arp\Container\Adapter
  */
-interface FactoryClassAwareInterface
+interface FactoryClassAwareInterface extends ContainerAdapterInterface
 {
     /**
      * Set the class name of a factory that will create service $name.
