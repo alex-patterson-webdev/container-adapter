@@ -19,7 +19,7 @@ abstract class AbstractPsrBridgeAdapter implements ContainerAdapterInterface
     /**
      * @var ContainerInterface
      */
-    protected $container;
+    protected ContainerInterface $container;
 
     /**
      * @param ContainerInterface $container
@@ -30,8 +30,6 @@ abstract class AbstractPsrBridgeAdapter implements ContainerAdapterInterface
     }
 
     /**
-     * Check if a service is registered with this name.
-     *
      * @param string $name The name of the service to check.
      *
      * @return bool
@@ -42,41 +40,27 @@ abstract class AbstractPsrBridgeAdapter implements ContainerAdapterInterface
     {
         try {
             return $this->container->has($name);
-        } catch (\Throwable $e) {
-            throw new AdapterException(
-                sprintf('The check for service \'%s\' failed : %s', $name, $e->getMessage()),
-                $e->getCode(),
-                $e
-            );
+        } catch (ContainerExceptionInterface $e) {
+            throw new AdapterException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
-     * Return a service matching the provided name.
-     *
-     * @param string $name The name of the service to return.
+     * @param string $name The name of the service to return
      *
      * @return mixed
      *
-     * @throws NotFoundException If the requested service cannot be found registered with the container
-     * @throws AdapterException If the requested service was found by could not be created or returned
+     * @throws NotFoundException
+     * @throws AdapterException
      */
     public function getService(string $name)
     {
         try {
             return $this->container->get($name);
         } catch (NotFoundExceptionInterface $e) {
-            throw new NotFoundException(
-                sprintf('The service \'%s\' could not be found : %s', $name, $e->getMessage()),
-                $e->getCode(),
-                $e
-            );
+            throw new NotFoundException($e->getMessage(), $e->getCode(), $e);
         } catch (ContainerExceptionInterface $e) {
-            throw new AdapterException(
-                sprintf('The service \'%s\' was found but could not be returned : %s', $name, $e->getMessage()),
-                $e->getCode(),
-                $e
-            );
+            throw new AdapterException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

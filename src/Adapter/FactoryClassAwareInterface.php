@@ -19,9 +19,7 @@ interface FactoryClassAwareInterface extends ContainerAdapterInterface
      * @param string      $factory The fully qualified class name of the factory.
      * @param string|null $method  The name of the factory method to call.
      *
-     * @return ContainerAdapterInterface
-     *
      * @throws AdapterException If the factory class cannot be set
      */
-    public function setFactoryClass(string $name, string $factory, string $method = null): ContainerAdapterInterface;
+    public function setFactoryClass(string $name, string $factory, string $method = null);
 }
