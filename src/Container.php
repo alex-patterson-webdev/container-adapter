@@ -13,7 +13,6 @@ use Arp\Container\Provider\ServiceProviderInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
@@ -27,18 +26,11 @@ final class Container implements ContainerInterface
     private ContainerAdapterInterface $adapter;
 
     /**
-     * @var LoggerInterface
-     */
-    private LoggerInterface $logger;
-
-    /**
      * @param ContainerAdapterInterface $adapter
-     * @param LoggerInterface           $logger
      */
-    public function __construct(ContainerAdapterInterface $adapter, LoggerInterface $logger)
+    public function __construct(ContainerAdapterInterface $adapter)
     {
         $this->adapter = $adapter;
-        $this->logger = $logger;
     }
 
     /**
@@ -59,11 +51,7 @@ final class Container implements ContainerInterface
         try {
             return $this->adapter->hasService($name);
         } catch (AdapterException $e) {
-            $errorMessage = sprintf('The has() method call failed for service \'%s\' : %s', $name, $e->getMessage());
-
-            $this->logger->debug($errorMessage, ['exception' => $e, 'name' => $name]);
-
-            throw new Exception\ContainerException($errorMessage, $e->getCode(), $e);
+            throw new Exception\ContainerException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -82,17 +70,9 @@ final class Container implements ContainerInterface
         try {
             return $this->adapter->getService($name);
         } catch (NotFoundException $e) {
-            $errorMessage = sprintf('The service \'%s\' could not be found', $name);
-
-            $this->logger->error($errorMessage, ['exception' => $e, 'name' => $name]);
-
-            throw new Exception\NotFoundException($errorMessage, $e->getCode(), $e);
+            throw new Exception\NotFoundException($e->getMessage(), $e->getCode(), $e);
         } catch (AdapterException $e) {
-            $errorMessage = sprintf('The get() failed for service \'%s\' : %s', $name, $e->getMessage());
-
-            $this->logger->error($errorMessage, ['exception' => $e, 'name' => $name]);
-
-            throw new Exception\ContainerException($errorMessage, $e->getCode(), $e);
+            throw new Exception\ContainerException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -108,16 +88,15 @@ final class Container implements ContainerInterface
         try {
             $serviceProvider->registerServices($this->adapter);
         } catch (ServiceProviderException $e) {
-            $className = get_class($serviceProvider);
-            $errorMessage = sprintf(
-                'Failed to register service provider \'%s\': %s',
-                $className,
-                $e->getMessage()
+            throw new ContainerException(
+                sprintf(
+                    'Failed to register service provider \'%s\': %s',
+                    get_class($serviceProvider),
+                    $e->getMessage()
+                ),
+                $e->getCode(),
+                $e
             );
-
-            $this->logger->error($errorMessage, ['exception' => $e, 'serviceProvider' => $className]);
-
-            throw new ContainerException($errorMessage, $e->getCode(), $e);
         }
     }
 }
