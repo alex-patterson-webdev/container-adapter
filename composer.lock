@@ -4,28 +4,27 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7090c6bce093a36b56285491b752e8a4",
+    "content-hash": "fa493c6c2c4c6b2a8adb5f4ef7c22852",
     "packages": [
         {
             "name": "alex-patterson-webdev/factory",
-            "version": "dev-feature/2.0.0",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/alex-patterson-webdev/factory.git",
-                "reference": "1a1a315546738efc8311e4724c7e84eefc2a8570"
+                "reference": "59815fc82ffe88e91e3ad45c93b6b3e0af9df1c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/alex-patterson-webdev/factory/zipball/1a1a315546738efc8311e4724c7e84eefc2a8570",
-                "reference": "1a1a315546738efc8311e4724c7e84eefc2a8570",
+                "url": "https://api.github.com/repos/alex-patterson-webdev/factory/zipball/59815fc82ffe88e91e3ad45c93b6b3e0af9df1c0",
+                "reference": "59815fc82ffe88e91e3ad45c93b6b3e0af9df1c0",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.3",
-                "psr/container": "^1.0.0"
+                "php": "^7.2"
             },
             "require-dev": {
-                "phpunit/phpunit": "^9.1"
+                "phpunit/phpunit": "^8"
             },
             "type": "library",
             "autoload": {
@@ -40,7 +39,7 @@
                     "email": "alex.patterson.webdev@gmail.com"
                 }
             ],
-            "time": "2020-08-31T13:29:38+00:00"
+            "time": "2020-02-09T19:17:23+00:00"
         },
         {
             "name": "psr/container",
@@ -610,16 +609,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "9.1.6",
+            "version": "9.1.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "d25b24b1cd14772bde4d75daeb393dc17db9f6e6"
+                "reference": "2ef92bec3186a827faf7362ff92ae4e8ec2e49d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/d25b24b1cd14772bde4d75daeb393dc17db9f6e6",
-                "reference": "d25b24b1cd14772bde4d75daeb393dc17db9f6e6",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/2ef92bec3186a827faf7362ff92ae4e8ec2e49d2",
+                "reference": "2ef92bec3186a827faf7362ff92ae4e8ec2e49d2",
                 "shasum": ""
             },
             "require": {
@@ -673,7 +672,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2020-08-31T06:31:46+00:00"
+            "time": "2020-09-03T07:09:19+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -1923,9 +1922,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "alex-patterson-webdev/factory": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

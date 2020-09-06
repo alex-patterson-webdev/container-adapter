@@ -16,7 +16,7 @@
     "php" : ">=7.4",
     "psr/container" : "^1",
     "psr/log": "^1",
-    "alex-patterson-webdev/factory": "dev-feature/2.0.0"
+    "alex-patterson-webdev/factory": "^1"
   },
   "require-dev": {
     "phpunit/phpunit" : "^9.2"
