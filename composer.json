@@ -1,7 +1,7 @@
 {
   "name" : "alex-patterson-webdev/container",
   "description": "PSR container adapter",
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
   "prefer-stable": true,
   "authors": [
     {
@@ -15,11 +15,11 @@
   "require": {
     "php" : ">=7.4",
     "psr/container" : "^1",
-    "psr/log" : "^1",
-    "alex-patterson-webdev/factory": "^1"
+    "psr/log": "^1",
+    "alex-patterson-webdev/factory": "dev-feature/2.0.0"
   },
   "require-dev": {
-    "phpunit/phpunit" : "^9.1"
+    "phpunit/phpunit" : "^9.2"
   },
   "autoload": {
     "psr-4": {
@@ -32,7 +32,7 @@
     }
   },
   "scripts": {
-    "test": "phpunit --coverage-clover=coverage.xml"
+    "test": "php vendor/bin/phpunit --coverage-clover=coverage.xml"
   },
   "config": {
     "preferred-install": "dist",
