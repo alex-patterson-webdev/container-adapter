@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace ArpTest\Container\Factory;
 
 use Arp\Container\Adapter\ContainerAdapterInterface;
-use Arp\Container\Container;
 use Arp\Container\Factory\ContainerFactory;
 use Arp\Factory\Exception\FactoryException;
 use Arp\Factory\FactoryInterface;
@@ -15,19 +14,32 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
+ * @covers \Arp\Container\Factory\ContainerFactory
+ *
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package ArpTest\Container\Factory
  */
 final class ContainerFactoryTest extends TestCase
 {
     /**
+     * @var FactoryInterface|MockObject
+     */
+    private $adapterFactory;
+
+    /**
+     * Create test case dependencies
+     */
+    public function setUp(): void
+    {
+        $this->adapterFactory = $this->createMock(FactoryInterface::class);
+    }
+
+    /**
      * Assert that the container factory implements FactoryInterface
-     *
-     * @covers \Arp\Container\Factory\ContainerFactory
      */
     public function testImplementsFactoryInterface(): void
     {
-        $factory = new ContainerFactory();
+        $factory = new ContainerFactory($this->adapterFactory);
 
         $this->assertInstanceOf(FactoryInterface::class, $factory);
     }
@@ -36,18 +48,18 @@ final class ContainerFactoryTest extends TestCase
      * Assert that if the required 'adapter' configuration is not provided then FactoryException is thrown.
      *
      * @throws FactoryException
-     *
-     * @covers \Arp\Container\Factory\ContainerFactory::create
      */
     public function testCreateWillThrowFactoryExceptionIfTheAdapterConfigurationOptionIsNotProvided(): void
     {
-        $factory = new ContainerFactory();
+        $factory = new ContainerFactory($this->adapterFactory);
 
         $this->expectException(FactoryException::class);
-        $this->expectExceptionMessage(sprintf(
-            'The \'adapter\' configuration option is required in \'%s\'',
-            ContainerFactory::class
-        ));
+        $this->expectExceptionMessage(
+            sprintf(
+                'The required \'adapter\' configuration option is missing in \'%s\'',
+                ContainerFactory::class
+            )
+        );
 
         $factory->create([]);
     }
@@ -56,81 +68,68 @@ final class ContainerFactoryTest extends TestCase
      * Assert that a FactoryException is thrown from create if the provided adapter is not of of
      * type ContainerAdapterInterface.
      *
-     * @covers \Arp\Container\Factory\ContainerFactory::create
-     *
      * @throws FactoryException
      */
     public function testCreateWillThrowFactoryExceptionIfProvidedAdapterIsInvalid(): void
     {
-        $factory = new ContainerFactory();
+        $factory = new ContainerFactory($this->adapterFactory);
 
-        $config = [
-            'adapter' => 123, // invalid adapter!
-        ];
+        $adapter = new \stdClass();
 
         $this->expectException(FactoryException::class);
-        $this->expectExceptionMessage(sprintf(
-            'The \'adapter\' configuration option must be a object of type \'%s\'; \'%s\' provided in \'%s\'',
-            ContainerAdapterInterface::class,
-            gettype($config['adapter']),
-            ContainerFactory::class
-        ));
+        $this->expectExceptionMessage(
+            sprintf(
+                'The \'adapter\' configuration option must be a object of type \'%s\'; \'%s\' provided in \'%s\'',
+                ContainerAdapterInterface::class,
+                (is_object($adapter) ? get_class($adapter) : gettype($adapter)),
+                ContainerFactory::class
+            )
+        );
 
-        $factory->create($config);
+        $factory->create(compact('adapter'));
     }
 
     /**
-     * Assert that a FactoryException is thrown if providing an invalid instance of the logger to create().
-     *
-     * @covers \Arp\Container\Factory\ContainerFactory::create
-     *
-     * @throws FactoryException
-     */
-    public function testCreateWillThrowFactoryExceptionIfProvidedLoggerIsInvalid(): void
-    {
-        $factory = new ContainerFactory();
-
-        $logger = new \stdClass();
-        $config = [
-            'adapter' => $this->getMockForAbstractClass(ContainerAdapterInterface::class),
-            'logger' => $logger, // invalid logger!
-        ];
-
-        $this->expectException(FactoryException::class);
-        $this->expectExceptionMessage(sprintf(
-            'The \'logger\' configuration option must be a object of type \'%s\'; \'%s\' provided in \'%s\'',
-            LoggerInterface::class,
-            get_class($logger),
-            ContainerFactory::class
-        ));
-
-        $factory->create($config);
-    }
-
-    /**
-     * Assert that a valid Container is created when providing configuration options to create().
-     *
-     * @covers \Arp\Container\Factory\ContainerFactory::create
+     * Assert that a valid Container is created when providing configuration options to create() that contains
+     * and already created adapter instance
      *
      * @throws FactoryException
      */
-    public function testCreateWillReturnContainer(): void
+    public function testCreateWillReturnContainerWithAdapterInstance(): void
     {
-        $factory = new ContainerFactory();
+        $factory = new ContainerFactory($this->adapterFactory);
 
         /** @var ContainerAdapterInterface|MockObject $adapter */
         $adapter = $this->getMockForAbstractClass(ContainerAdapterInterface::class);
 
-        /** @var LoggerInterface $logger */
-        $logger = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->assertInstanceOf(ContainerInterface::class, $factory->create(compact('adapter')));
+    }
+
+    /**
+     * Assert that a valid Container is created when providing configuration options to create() that contains
+     * adapter configuration as an array
+     *
+     * @throws FactoryException
+     */
+    public function testCreateWillReturnContainerWithAdapterArrayConfiguration(): void
+    {
+        $factory = new ContainerFactory($this->adapterFactory);
 
         $config = [
-            'adapter' => $adapter,
-            'logger' => $logger,
+            'adapter' => [
+                'foo' => 'bar',
+                'test' => new \stdClass(),
+            ]
         ];
 
-        $container = $factory->create($config);
+        /** @var ContainerAdapterInterface|MockObject $adapter */
+        $adapter = $this->getMockForAbstractClass(ContainerAdapterInterface::class);
 
-        $this->assertInstanceOf(ContainerInterface::class, $container);
+        $this->adapterFactory->expects($this->once())
+            ->method('create')
+            ->with($config['adapter'])
+            ->willReturn($adapter);
+
+        $this->assertInstanceOf(ContainerInterface::class, $factory->create($config));
     }
 }
