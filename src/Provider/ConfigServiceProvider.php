@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Arp\Container\Provider;
 
+use Arp\Container\Adapter\AliasAwareInterface;
 use Arp\Container\Adapter\ContainerAdapterInterface;
 use Arp\Container\Adapter\Exception\AdapterException;
 use Arp\Container\Adapter\FactoryClassAwareInterface;
-use Arp\Container\Constant\ServiceConfigKey;
 use Arp\Container\Provider\Exception\NotSupportedException;
 use Arp\Container\Provider\Exception\ServiceProviderException;
 
@@ -17,6 +17,10 @@ use Arp\Container\Provider\Exception\ServiceProviderException;
  */
 final class ConfigServiceProvider implements ServiceProviderInterface
 {
+    public const ALIASES = 'aliases';
+    public const FACTORIES = 'factories';
+    public const SERVICES = 'services';
+
     /**
      * @var array
      */
@@ -40,8 +44,39 @@ final class ConfigServiceProvider implements ServiceProviderInterface
      */
     public function registerServices(ContainerAdapterInterface $adapter): void
     {
-        $factories = $this->config[ServiceConfigKey::FACTORIES] ?? [];
+        $services = $this->config[static::SERVICES] ?? [];
+        foreach ($services as $name => $service) {
+            try {
+                $adapter->setService($name, $service);
+            } catch (AdapterException $e) {
+                throw new ServiceProviderException(
+                    sprintf('Failed to register service \'%s\': %s', $name, $e->getMessage()),
+                    $e->getCode(),
+                    $e
+                );
+            }
+        }
 
+        $factories = $this->config[static::FACTORIES] ?? [];
+        if (!empty($factories)) {
+            $this->registerFactories($adapter, $factories);
+        }
+
+        $aliases = $this->config[static::ALIASES] ?? [];
+        if (!empty($aliases) && $adapter instanceof AliasAwareInterface) {
+            $this->registerAliases($adapter, $aliases);
+        }
+    }
+
+    /**
+     * @param ContainerAdapterInterface $adapter
+     * @param array                      $factories
+     *
+     * @throws NotSupportedException
+     * @throws ServiceProviderException
+     */
+    private function registerFactories(ContainerAdapterInterface $adapter, array $factories): void
+    {
         foreach ($factories as $name => $factory) {
             if (is_array($factory)) {
                 $this->registerArrayFactory($adapter, $name, $factory);
@@ -49,11 +84,47 @@ final class ConfigServiceProvider implements ServiceProviderInterface
             }
 
             if (is_string($factory)) {
+                if (!$adapter instanceof FactoryClassAwareInterface) {
+                    throw new NotSupportedException(
+                        sprintf(
+                            'The adapter \'%s\' does not support the registration of string factory classes \'%s\'',
+                            get_class($adapter),
+                            $factory
+                        )
+                    );
+                }
+
                 $this->registerStringFactory($adapter, $name, $factory);
                 continue;
             }
 
             $this->registerFactory($adapter, $name, $factory);
+        }
+    }
+
+    /**
+     * @param AliasAwareInterface $adapter
+     * @param array               $aliases
+     *
+     * @throws ServiceProviderException
+     */
+    private function registerAliases(AliasAwareInterface $adapter, array $aliases): void
+    {
+        foreach ($aliases as $alias => $serviceName) {
+            try {
+                $adapter->setAlias($alias, $serviceName);
+            } catch (AdapterException $e) {
+                throw new ServiceProviderException(
+                    sprintf(
+                        'Failed to register alias \'%s\' for service \'%s\': %s',
+                        $alias,
+                        $serviceName,
+                        $e->getMessage()
+                    ),
+                    $e->getCode(),
+                    $e
+                );
+            }
         }
     }
 
@@ -71,17 +142,15 @@ final class ConfigServiceProvider implements ServiceProviderInterface
         $factory,
         string $methodName = null
     ): void {
-        if (is_object($factory)) {
-            $factory = [$factory, $methodName ?? '__invoke'];
+        $methodName = $methodName ?? '__invoke';
+
+        if (!is_callable($factory) && !$factory instanceof \Closure) {
+            $factory = [$factory, $methodName];
         }
 
         if (!is_callable($factory)) {
             throw new ServiceProviderException(
-                sprintf(
-                    'Failed to register service \'%s\': The factory object method \'%s\' is not callable',
-                    $serviceName,
-                    $methodName
-                ),
+                sprintf('Failed to register service \'%s\': The factory provided is not callable', $serviceName),
             );
         }
 
@@ -89,11 +158,7 @@ final class ConfigServiceProvider implements ServiceProviderInterface
             $adapter->setFactory($serviceName, $factory);
         } catch (AdapterException $e) {
             throw new ServiceProviderException(
-                sprintf(
-                    'Failed to set callable factory for service \'%s\': %s',
-                    $serviceName,
-                    $e->getMessage()
-                ),
+                sprintf('Failed to set callable factory for service \'%s\': %s', $serviceName, $e->getMessage()),
                 $e->getCode(),
                 $e
             );
@@ -122,10 +187,7 @@ final class ConfigServiceProvider implements ServiceProviderInterface
 
         if (null === $factory) {
             throw new ServiceProviderException(
-                sprintf(
-                    'The factory configuration array for service \'%s\' is invalid',
-                    $serviceName
-                )
+                sprintf('The factory configuration array for service \'%s\' is invalid', $serviceName)
             );
         }
 
@@ -153,7 +215,6 @@ final class ConfigServiceProvider implements ServiceProviderInterface
      * @param string                    $serviceName
      * @param string                    $factory
      * @param string|null               $methodName
-     * @param bool                      $allowFactoryLookup
      *
      * @throws NotSupportedException
      * @throws ServiceProviderException
@@ -162,8 +223,7 @@ final class ConfigServiceProvider implements ServiceProviderInterface
         ContainerAdapterInterface $adapter,
         string $serviceName,
         string $factory,
-        string $methodName = null,
-        bool $allowFactoryLookup = true
+        string $methodName = null
     ): void {
         if (!$adapter instanceof FactoryClassAwareInterface) {
             throw new NotSupportedException(
@@ -176,33 +236,6 @@ final class ConfigServiceProvider implements ServiceProviderInterface
         }
 
         $methodName ??= '__invoke';
-
-        try {
-            if (true === $allowFactoryLookup && $adapter->hasService($factory)) {
-                $factory = $adapter->getService($factory);
-            }
-        } catch (AdapterException $e) {
-            throw new ServiceProviderException(
-                sprintf(
-                    'Failed to load the required factory for service \'%s\': %s',
-                    $serviceName,
-                    $e->getMessage()
-                ),
-                $e->getCode(),
-                $e
-            );
-        }
-
-        if (!method_exists($factory, $methodName)) {
-            throw new ServiceProviderException(
-                sprintf(
-                    'Unable to register factory class \'%s\' for service \'%s\': The method \'%s\' could not be found',
-                    $factory,
-                    $serviceName,
-                    $methodName
-                )
-            );
-        }
 
         try {
             $adapter->setFactoryClass($serviceName, $factory, $methodName);

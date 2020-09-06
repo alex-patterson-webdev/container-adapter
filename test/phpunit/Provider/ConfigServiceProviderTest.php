@@ -7,6 +7,7 @@ namespace ArpTest\Container\Provider;
 use Arp\Container\Adapter\ContainerAdapterInterface;
 use Arp\Container\Adapter\Exception\AdapterException;
 use Arp\Container\Adapter\FactoryClassAwareInterface;
+use Arp\Container\Factory\ServiceFactoryInterface;
 use Arp\Container\Provider\ConfigServiceProvider;
 use Arp\Container\Provider\Exception\NotSupportedException;
 use Arp\Container\Provider\Exception\ServiceProviderException;
@@ -15,6 +16,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * @covers \Arp\Container\Provider\ConfigServiceProvider
+ *
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package ArpTest\Container\Provider
  */
@@ -22,8 +25,6 @@ final class ConfigServiceProviderTest extends TestCase
 {
     /**
      * Assert that the class implements ServiceProviderInterface.
-     *
-     * @covers \Arp\Container\Provider\ConfigServiceProvider
      */
     public function testImplementsServiceProviderInterface(): void
     {
@@ -33,31 +34,35 @@ final class ConfigServiceProviderTest extends TestCase
     }
 
     /**
-     * Assert that a NotSupportedException will be thrown if we tru to set a string factory class with an adapter
+     * Assert that a NotSupportedException will be thrown if we try to set a string factory class with an adapter
      * that does not implement FactoryClassAwareInterface
      *
      * @throws ServiceProviderException
-     *
-     * @covers \Arp\Container\Provider\ConfigServiceProvider::registerServices
      */
     public function testUsingStringFactoryWithNonFactoryClassAwareAdapterWillThrowNotSupportedException(): void
     {
         $name = 'FooService';
         $service = \stdClass::class;
 
-        $serviceProvider = new ConfigServiceProvider([
-            'factories' => [$name => $service]
-        ]);
+        $serviceProvider = new ConfigServiceProvider(
+            [
+                'factories' => [
+                    $name => $service
+                ],
+            ]
+        );
 
         /** @var ContainerAdapterInterface|MockObject $adapter */
         $adapter = $this->getMockForAbstractClass(ContainerAdapterInterface::class);
 
         $this->expectException(NotSupportedException::class);
-        $this->expectExceptionMessage(sprintf(
-            'The adapter class \'%s\' does not support factory class registration for service \'%s\'',
-            get_class($adapter),
-            $name
-        ));
+        $this->expectExceptionMessage(
+            sprintf(
+                'The adapter \'%s\' does not support the registration of string factory classes \'%s\'',
+                get_class($adapter),
+                $service
+            )
+        );
 
         $serviceProvider->registerServices($adapter);
     }
@@ -66,31 +71,27 @@ final class ConfigServiceProviderTest extends TestCase
      * Assert that invalid factories will raise a ServiceProviderException
      *
      * @throws ServiceProviderException
-     *
-     * @covers \Arp\Container\Provider\ConfigServiceProvider::registerServices
      */
     public function testRegisterServicesWillThrowServiceProviderExceptionIfProvidedFactoryIsInvalid(): void
     {
         $serviceName = 'FooService';
         $serviceFactory = false; // this is our invalid factory
 
-        $serviceProvider = new ConfigServiceProvider([
-            'factories' => [
-                $serviceName => $serviceFactory
+        $serviceProvider = new ConfigServiceProvider(
+            [
+                'factories' => [
+                    $serviceName => $serviceFactory,
+                ],
             ]
-        ]);
+        );
 
         /** @var ContainerAdapterInterface|MockObject $adapter */
         $adapter = $this->getMockForAbstractClass(ContainerAdapterInterface::class);
 
-        $exceptionMessage = sprintf(
-            'Service factories must be of type \'callable\'; \'%s\' provided for service \'%s\'',
-            (is_object($serviceFactory) ? get_class($serviceFactory) : gettype($serviceFactory)),
-            $serviceName
-        );
-
         $this->expectException(ServiceProviderException::class);
-        $this->expectExceptionMessage($exceptionMessage);
+        $this->expectExceptionMessage(
+            sprintf('Failed to register service \'%s\': The factory provided is not callable', $serviceName)
+        );
 
         $serviceProvider->registerServices($adapter);
     }
@@ -99,40 +100,43 @@ final class ConfigServiceProviderTest extends TestCase
      * Assert that AdapterException thrown from the adapter are caught and rethrown as ServiceProviderException.
      *
      * @throws ServiceProviderException
-     *
-     * @covers \Arp\Container\Provider\ConfigServiceProvider::registerServices
      */
     public function testRegisterServicesWillCatchAdapterExceptionAndRethrowAsServiceProviderException(): void
     {
         $serviceName = 'Foo';
-        $serviceFunc = static function (): \stdClass {
+        $serviceFactory = static function (): \stdClass {
             return new \stdClass();
         };
 
         $config = [
             'factories' => [
-                $serviceName => $serviceFunc,
+                $serviceName => $serviceFactory,
             ],
         ];
-
-        $serviceProvider = new ConfigServiceProvider($config);
 
         /** @var ContainerAdapterInterface|MockObject $adapter */
         $adapter = $this->getMockForAbstractClass(ContainerAdapterInterface::class);
 
         $exceptionMessage = 'This is a test exception message';
-        $exception = new AdapterException($exceptionMessage, 123);
+        $exceptionCode = 3456;
+        $exception = new AdapterException($exceptionMessage, $exceptionCode);
 
         $adapter->expects($this->once())
             ->method('setFactory')
-            ->with($serviceName, $serviceFunc)
+            ->with($serviceName, $serviceFactory)
             ->willThrowException($exception);
 
         $this->expectException(ServiceProviderException::class);
-        $this->expectExceptionMessage(sprintf('Failed to register adapter services : %s', $exceptionMessage));
-        $this->expectExceptionCode(123);
+        $this->expectExceptionCode($exceptionCode);
+        $this->expectExceptionMessage(
+            sprintf(
+                'Failed to set callable factory for service \'%s\': %s',
+                $serviceName,
+                $exceptionMessage
+            ),
+        );
 
-        $serviceProvider->registerServices($adapter);
+        (new ConfigServiceProvider($config))->registerServices($adapter);
     }
 
     /**
@@ -141,7 +145,6 @@ final class ConfigServiceProviderTest extends TestCase
      * @param array $config The services that should be set
      *
      * @dataProvider getRegisterServicesData
-     * @covers \Arp\Container\Provider\ConfigServiceProvider::registerServices
      *
      * @throws ServiceProviderException
      */
@@ -153,7 +156,7 @@ final class ConfigServiceProviderTest extends TestCase
         $adapter = $this->createMock(FactoryClassAwareInterface::class);
 
         $factories = $config['factories'] ?? [];
-        $services  = $config['services']  ?? [];
+        $services = $config['services'] ?? [];
 
         $setFactoryArgs = $setServiceArgs = $setClassArgs = [];
 
@@ -169,16 +172,16 @@ final class ConfigServiceProviderTest extends TestCase
         }
 
         $adapter->expects($this->exactly(count($setFactoryArgs)))
-                ->method('setFactory')
-                ->withConsecutive(...$setFactoryArgs);
+            ->method('setFactory')
+            ->withConsecutive(...$setFactoryArgs);
 
         $adapter->expects($this->exactly(count($setClassArgs)))
-                ->method('setFactoryClass')
-                ->withConsecutive(...$setClassArgs);
+            ->method('setFactoryClass')
+            ->withConsecutive(...$setClassArgs);
 
         $adapter->expects($this->exactly(count($setServiceArgs)))
-                ->method('setService')
-                ->withConsecutive(...$setServiceArgs);
+            ->method('setService')
+            ->withConsecutive(...$setServiceArgs);
 
         $serviceProvider->registerServices($adapter);
     }
@@ -200,7 +203,7 @@ final class ConfigServiceProviderTest extends TestCase
                             return 'Hi';
                         },
                     ],
-                ]
+                ],
             ],
 
             [
@@ -208,7 +211,7 @@ final class ConfigServiceProviderTest extends TestCase
                     'services' => [
                         'FooService' => new \stdClass(),
                         'BarService' => new \stdClass(),
-                        'Baz' => 123,
+                        'Baz'        => 123,
                     ],
                 ],
             ],
@@ -216,11 +219,10 @@ final class ConfigServiceProviderTest extends TestCase
             [
                 [
                     'factories' => [
-                        'BazStringService' => 'Hello',
-                        'Bar' => static function () {
+                        'BazStringService' => $this->getMockForAbstractClass(ServiceFactoryInterface::class),
+                        'Bar'              => static function () {
                             return 'Test';
                         },
-                        'Foo' => 'FooFactory',
                     ],
                 ],
             ],
