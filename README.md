@@ -10,7 +10,7 @@ A PSR-11 compatible Dependency Injection Container implementation providing agno
 The [PSR-11: Container interface](https://www.php-fig.org/psr/psr-11/) provides interoperability 
 for PHP projects when _retrieving_ services from different DI container implementations. The `Arp\Container` project is 
 intended to complement this specification by unionising the various different approaches that containers use for _service registration_. 
-With unification, we can create software libraries which utilise features IoC containers, register services 
+With unification, we can create software libraries which utilise features IoC containers and register services 
 in a single location, without dictating a specific container that should be used.
 
 ## Installation
@@ -128,7 +128,7 @@ The Service Provider is then passed to the container to register the services.
 There are many additional registration features that popular DI containers provide. In order to support these
 differences in a generic way the library provides more specific adapter interfaces that can be implemented.
 
-#### Arp\Container\Adapter\AliasAwareInterface` 
+#### Arp\Container\Adapter\AliasAwareInterface 
 Containers which allow services names to be substituted for an alias, or alternative name for the service.
 
     use Arp\Container\Provider\ServiceProviderInterface;
@@ -145,11 +145,11 @@ Containers which allow services names to be substituted for an alias, or alterna
             $adapter->setService('Bar', new \stdClass());
             $adapter->setAlias('Foo', 'Bar');
         }
-   }
+    }
    
 When registering an alias, you must ensure the service being aliased has already been registered.     
    
-#### Arp\Container\Adapter\FactoryClassAwareInterface`
+#### Arp\Container\Adapter\FactoryClassAwareInterface
 
 Allows registration of service factories as strings. This is a useful if most of your service registration is 
 configuration based as you will not need to create the factories to register them, they will only be created
@@ -161,6 +161,9 @@ once you request the relevant service.
 
     class BarServiceFactory {
         public function __invoke(ContainerInterface $container): BarService
+        {
+            return new BarService($container->get('FooService'));
+        }
     }
 
     class FooServiceProvider implments ServiceProviderInterface
@@ -173,6 +176,27 @@ once you request the relevant service.
             $adapter->setFactoryClass('Bar', BarServiceFactory::class);
         }
    }
+
+## ConfigServiceProvider
+
+We can reduce the need to write repeated Service Provider logic by using a configuration array passed to the 
+`Arp\Provider\ConfigServiceProvider`.
+    
+    $config = [
+        ConfigServiceProvider::FACTORIES = [
+            'FooService' => static function (Psr\ContainerInterface $container) {
+                return new FooService($container->get('BarService'));
+            }
+        ],
+        ConfigServiceProvider::ALIASES = [
+            'FooAlias' => 'FooService',
+            'AnotherAliasForBar' => 'BarService',
+        ],
+        ConfigServiceProvider::SERVICES = [
+            'BarService' => new BarService();
+        ],
+    ];
+    $container->registerService(new ConfigServiceProvider($config));
 
 ## Unit Tests
 
