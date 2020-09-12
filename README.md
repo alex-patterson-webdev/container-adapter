@@ -48,18 +48,18 @@ In order to use the container we must provide an adapter class for the container
     
 There are a number of existing projects that have already been created; depending on which container you are currently using.
     
-####[arp\container-array](https://github.com/alex-patterson-webdev/container-array)
+#### [arp\container-array](https://github.com/alex-patterson-webdev/container-array)
 - Provides a simple implementation of the required adapters that does not require an existing container. You should use this 
 adapter if you do not already have your own container that needs to be integrated with.
     
-####[arp\contianer-pimple](https://github.com/alex-patterson-webdev/container-pimple)
+#### [arp\contianer-pimple](https://github.com/alex-patterson-webdev/container-pimple)
 - Required container integration library for the Pimple container
     
-####arp\container-php-di
+#### arp\container-php-di
 - Required container integration library for the PHP-DI container. This consists of an adapter that can be used to register 
 services with a PHP-DI container you are already using in your projects. (@todo)
     
-####arp\container-laminas-service-manager 
+#### arp\container-laminas-service-manager 
 - Required container integration library for the Laminas ServiceManager (@todo)
     
 The container 'adapters' unify the different approaches many popular dependency injection containers take when implementing 
