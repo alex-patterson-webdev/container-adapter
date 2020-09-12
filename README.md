@@ -128,7 +128,7 @@ The Service Provider is then passed to the container to register the services.
 There are many additional registration features that popular DI containers provide. In order to support these
 differences in a generic way the library provides more specific adapter interfaces that can be implemented.
 
-####Arp\Container\Adapter\AliasAwareInterface` 
+#### Arp\Container\Adapter\AliasAwareInterface` 
 Containers which allow services names to be substituted for an alias, or alternative name for the service.
 
     use Arp\Container\Provider\ServiceProviderInterface;
@@ -149,7 +149,7 @@ Containers which allow services names to be substituted for an alias, or alterna
    
 When registering an alias, you must ensure the service being aliased has already been registered.     
    
-####Arp\Container\Adapter\FactoryClassAwareInterface`
+#### Arp\Container\Adapter\FactoryClassAwareInterface`
 
 Allows registration of service factories as strings. This is a useful if most of your service registration is 
 configuration based as you will not need to create the factories to register them, they will only be created
