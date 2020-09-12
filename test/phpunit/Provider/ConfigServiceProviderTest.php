@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ArpTest\Container\Provider;
 
+use Arp\Container\Adapter\AliasAwareInterface;
 use Arp\Container\Adapter\ContainerAdapterInterface;
 use Arp\Container\Adapter\Exception\AdapterException;
 use Arp\Container\Factory\ServiceFactoryInterface;
@@ -13,9 +14,10 @@ use Arp\Container\Provider\Exception\ServiceProviderException;
 use Arp\Container\Provider\ServiceProviderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 
 /**
- * @covers \Arp\Container\Provider\ConfigServiceProvider
+ * @covers  \Arp\Container\Provider\ConfigServiceProvider
  *
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package ArpTest\Container\Provider
@@ -58,7 +60,7 @@ final class ConfigServiceProviderTest extends TestCase
         $service = new \stdClass();
         $config = [
             ConfigServiceProvider::SERVICES => [
-                $name => $service
+                $name => $service,
             ],
         ];
 
@@ -92,7 +94,7 @@ final class ConfigServiceProviderTest extends TestCase
         $serviceProvider = new ConfigServiceProvider(
             [
                 'factories' => [
-                    $name => $service
+                    $name => $service,
                 ],
             ]
         );
@@ -176,6 +178,56 @@ final class ConfigServiceProviderTest extends TestCase
     }
 
     /**
+     * @throws NotSupportedException
+     * @throws ServiceProviderException
+     */
+    public function testRegisterServicesWillThrowServiceProviderExceptionIfTheServiceAliasCannotBeSet(): void
+    {
+        $service = new \stdClass();
+        $serviceName = 'FooService';
+        $aliasName = 'FooAlias';
+
+        $config = [
+            'services' => [
+                $serviceName => $service,
+            ],
+            'aliases'  => [
+                $aliasName => $serviceName,
+            ],
+        ];
+
+        $exceptionMessage = 'Test exception message';
+        $exceptionCode = 12345;
+        $exception = new AdapterException($exceptionMessage, $exceptionCode);
+
+        /** @var AliasAwareInterface|MockObject $adapter */
+        $adapter = $this->getMockForAbstractClass(AliasAwareInterface::class);
+
+        $adapter->expects($this->once())
+            ->method('setService')
+            ->with($serviceName, $service);
+
+        $adapter->expects($this->once())
+            ->method('setAlias')
+            ->with($aliasName, $serviceName)
+            ->willThrowException($exception);
+
+        $this->expectException(ServiceProviderException::class);
+        $this->expectExceptionCode($exceptionCode);
+        $this->expectExceptionMessage(
+            sprintf(
+                'Failed to register alias \'%s\' for service \'%s\': %s',
+                $aliasName,
+                $serviceName,
+                $exceptionMessage
+            )
+        );
+
+        (new ConfigServiceProvider($config))->registerServices($adapter);
+    }
+
+
+    /**
      * Assert that register services will correctly register the provided services and factories defined in $config.
      *
      * @param array $config The services that should be set
@@ -197,8 +249,11 @@ final class ConfigServiceProviderTest extends TestCase
             if (is_array($factory)) {
                 $methodName = $factory[1] ?? '__invoke';
                 $factory = $factory[0] ?? null;
-            }
 
+                if (!is_callable($factory) && !$factory instanceof \Closure) {
+                    $factory = [$factory, $methodName];
+                }
+            }
 
             $setFactoryArgs[] = [$name, $factory];
         }
@@ -240,7 +295,7 @@ final class ConfigServiceProviderTest extends TestCase
 
             [
                 [
-                    ConfigServiceProvider::SERVICES => [
+                    'services' => [
                         'FooService' => new \stdClass(),
                         'BarService' => new \stdClass(),
                         'Baz'        => 123,
@@ -250,11 +305,28 @@ final class ConfigServiceProviderTest extends TestCase
 
             [
                 [
-                    ConfigServiceProvider::FACTORIES => [
+                    'factories' => [
                         'BazStringService' => $this->getMockForAbstractClass(ServiceFactoryInterface::class),
                         'Bar'              => static function () {
                             return 'Test';
                         },
+                    ],
+                ],
+            ],
+
+            // Array based registration for non callable factory object with custom method name 'create'
+            [
+                [
+                    'factories' => [
+                        'FooService' => [
+                            new class {
+                                public function create(ContainerInterface $container): \stdClass
+                                {
+                                    return new \stdClass();
+                                }
+                            },
+                            'create',
+                        ],
                     ],
                 ],
             ],
