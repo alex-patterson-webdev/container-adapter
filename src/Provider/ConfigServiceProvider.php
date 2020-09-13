@@ -176,7 +176,7 @@ final class ConfigServiceProvider implements ServiceProviderInterface
         $factory = $factoryConfig[0] ?? null;
 
         if (null !== $factory) {
-            $methodName = $factoryConfig[1] ?? '__invoke';
+            $methodName = $factoryConfig[1] ?? null;
 
             if (is_string($factory)) {
                 $this->registerStringFactory($adapter, $serviceName, $factory, $methodName);

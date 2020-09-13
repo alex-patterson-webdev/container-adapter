@@ -230,18 +230,30 @@ final class ConfigServiceProviderTest extends TestCase
         $factories = $config[ConfigServiceProvider::FACTORIES] ?? [];
         $services = $config[ConfigServiceProvider::SERVICES] ?? [];
 
-        $setFactoryArgs = $setServiceArgs = [];
+        $setFactoryArgs = $setServiceArgs = $setFactoryClassArgs = [];
 
+        /** @var FactoryClassAwareInterface|MockObject $adapter */
+        $adapter = $this->getMockForAbstractClass(FactoryClassAwareInterface::class);
         foreach ($factories as $name => $factory) {
+            $methodName = null;
+
             if (is_array($factory)) {
-                $methodName = $factory[1] ?? '__invoke';
+                $methodName = $factory[1] ?? null;
                 $factory = $factory[0] ?? null;
 
+                if (is_string($factory)) {
+                    $setFactoryClassArgs[] = [$name, $factory, $methodName];
+                    continue;
+                }
                 if (!is_callable($factory) && !$factory instanceof \Closure) {
                     $factory = [$factory, $methodName];
                 }
             }
 
+            if (is_string($factory)) {
+                $setFactoryClassArgs[] = [$name, $factory, $methodName];
+                continue;
+            }
             $setFactoryArgs[] = [$name, $factory];
         }
 
@@ -249,15 +261,19 @@ final class ConfigServiceProviderTest extends TestCase
             $setServiceArgs[] = [$name, $service];
         }
 
-        $this->adapter->expects($this->exactly(count($setFactoryArgs)))
+        $adapter->expects($this->exactly(count($setFactoryClassArgs)))
+            ->method('setFactoryClass')
+            ->withConsecutive(...$setFactoryClassArgs);
+
+        $adapter->expects($this->exactly(count($setFactoryArgs)))
             ->method('setFactory')
             ->withConsecutive(...$setFactoryArgs);
 
-        $this->adapter->expects($this->exactly(count($setServiceArgs)))
+        $adapter->expects($this->exactly(count($setServiceArgs)))
             ->method('setService')
             ->withConsecutive(...$setServiceArgs);
 
-        $serviceProvider->registerServices($this->adapter);
+        $serviceProvider->registerServices($adapter);
     }
 
     /**
@@ -317,6 +333,18 @@ final class ConfigServiceProviderTest extends TestCase
                     ],
                 ],
             ],
+
+            // String and array based registration
+            [
+                [
+                    'factories' => [
+                        'FooService' => 'StringFactoryName',
+                        'BazService' => ['BazServiceFactory'],
+                        'BarService' => ['StringBarServiceFactory', 'methodNameThatWillBeCalled'],
+                        'ZapService' => ['ZapServiceFactory', '__invoke'],
+                    ],
+                ]
+            ]
         ];
     }
 
