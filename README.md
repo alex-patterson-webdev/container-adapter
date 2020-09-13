@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.com/alex-patterson-webdev/container.svg?branch=master)](https://travis-ci.com/alex-patterson-webdev/container)
 [![codecov](https://codecov.io/gh/alex-patterson-webdev/container/branch/master/graph/badge.svg)](https://codecov.io/gh/alex-patterson-webdev/container)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/alex-patterson-webdev/container/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/alex-patterson-webdev/container/?branch=master)
 
 # Arp\Container
 
