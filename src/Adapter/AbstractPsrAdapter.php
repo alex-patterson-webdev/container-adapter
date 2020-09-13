@@ -11,10 +11,13 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 /**
+ * This class can be used base class for adapters proxying method calls to a PSR Container.
+ * Extending classes must implement the remaining requirements of ContainerAdapterInterface.
+ *
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package Arp\Container\Adapter
  */
-abstract class AbstractPsrBridgeAdapter implements ContainerAdapterInterface
+abstract class AbstractPsrAdapter implements ContainerAdapterInterface
 {
     /**
      * @var ContainerInterface
