@@ -372,11 +372,13 @@ final class ConfigServiceProviderTest extends TestCase
             ]
         ];
 
-        $this->adapter->expects($this->once())
+        /** @var FactoryClassAwareInterface|MockObject $adapter */
+        $adapter = $this->getMockForAbstractClass(FactoryClassAwareInterface::class);
+        $adapter->expects($this->once())
             ->method('setFactoryClass')
             ->with($serviceName, $factoryName, null);
 
         // We provide an adapter mock that is doe NOT implement FactoryClassAwareInterface
-        (new ConfigServiceProvider($config))->registerServices($this->adapter);
+        (new ConfigServiceProvider($config))->registerServices($adapter);
     }
 }
