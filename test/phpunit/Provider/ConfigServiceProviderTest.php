@@ -15,7 +15,6 @@ use Arp\Container\Provider\Exception\ServiceProviderException;
 use Arp\Container\Provider\ServiceProviderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 
 /**
  * @covers  \Arp\Container\Provider\ConfigServiceProvider
@@ -323,7 +322,7 @@ final class ConfigServiceProviderTest extends TestCase
                     'factories' => [
                         'FooService' => [
                             new class {
-                                public function create(ContainerInterface $container): \stdClass
+                                public function create(): \stdClass
                                 {
                                     return new \stdClass();
                                 }
@@ -382,6 +381,51 @@ final class ConfigServiceProviderTest extends TestCase
 
         // We provide an adapter mock that is doe NOT implement FactoryClassAwareInterface
         $serviceProvider->registerServices($this->adapter);
+    }
+
+    /**
+     * Assert that a ServiceProviderException is thrown when the provider is unable to register a factory class
+     *
+     * @throws NotSupportedException
+     * @throws ServiceProviderException
+     */
+    public function testStringFactoryRegistrationFailureWillThrowServiceProviderException(): void
+    {
+        $serviceName = 'FooService';
+        $factoryName = 'FooServiceFactory';
+        $factoryMethodName = null;
+
+        $config = [
+            'factories' => [
+                $serviceName => $factoryName,
+            ]
+        ];
+
+        /** @var FactoryClassAwareInterface|MockObject $adapter */
+        $adapter = $this->getMockForAbstractClass(FactoryClassAwareInterface::class);
+
+        $exceptionMessage = 'The exception message test string';
+        $exceptionCode = 12345;
+        $exception = new AdapterException($exceptionMessage, $exceptionCode);
+
+        $this->expectException(ServiceProviderException::class);
+        $this->expectExceptionCode($exceptionCode);
+        $this->expectExceptionMessage(
+            sprintf(
+                'Failed to register service \'%s\' with adapter \'%s\' using factory class \'%s\': %s',
+                $serviceName,
+                get_class($adapter),
+                $factoryName,
+                $exceptionMessage
+            )
+        );
+
+        $adapter->expects($this->once())
+            ->method('setFactoryClass')
+            ->with($serviceName, $factoryName, $factoryMethodName)
+            ->willThrowException($exception);
+
+        (new ConfigServiceProvider($config))->registerServices($adapter);
     }
 
     /**
