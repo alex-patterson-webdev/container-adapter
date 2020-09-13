@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ArpTest\Container\Adapter;
 
-use Arp\Container\Adapter\AbstractPsrBridgeAdapter;
+use Arp\Container\Adapter\AbstractPsrAdapter;
 use Arp\Container\Adapter\ContainerAdapterInterface;
 use Arp\Container\Adapter\Exception\AdapterException;
 use Arp\Container\Adapter\Exception\NotFoundException as AdapterNotFoundException;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 /**
- * @covers \Arp\Container\Adapter\AbstractPsrBridgeAdapter
+ * @covers \Arp\Container\Adapter\AbstractPsrAdapter
  *
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package ArpTest\Container\Adapter
@@ -40,8 +40,8 @@ final class AbstractPsrBridgeAdapterTest extends TestCase
      */
     public function testImplementsContainerAdapterInterface(): void
     {
-        /** @var AbstractPsrBridgeAdapter|MockObject $adapter */
-        $adapter = $this->getMockForAbstractClass(AbstractPsrBridgeAdapter::class, [$this->container]);
+        /** @var AbstractPsrAdapter|MockObject $adapter */
+        $adapter = $this->getMockForAbstractClass(AbstractPsrAdapter::class, [$this->container]);
 
         $this->assertInstanceOf(ContainerAdapterInterface::class, $adapter);
     }
@@ -53,8 +53,8 @@ final class AbstractPsrBridgeAdapterTest extends TestCase
      */
     public function testHasServiceWillThrowAnAdapterException(): void
     {
-        /** @var AbstractPsrBridgeAdapter|MockObject $adapter */
-        $adapter = $this->getMockForAbstractClass(AbstractPsrBridgeAdapter::class, [$this->container]);
+        /** @var AbstractPsrAdapter|MockObject $adapter */
+        $adapter = $this->getMockForAbstractClass(AbstractPsrAdapter::class, [$this->container]);
 
         $name = 'FooService';
 
@@ -82,8 +82,8 @@ final class AbstractPsrBridgeAdapterTest extends TestCase
      */
     public function testGetServiceWillThrowNotFoundExceptionForUnknownServiceName(): void
     {
-        /** @var AbstractPsrBridgeAdapter|MockObject $adapter */
-        $adapter = $this->getMockForAbstractClass(AbstractPsrBridgeAdapter::class, [$this->container]);
+        /** @var AbstractPsrAdapter|MockObject $adapter */
+        $adapter = $this->getMockForAbstractClass(AbstractPsrAdapter::class, [$this->container]);
 
         $name = 'FooService';
 
@@ -110,8 +110,8 @@ final class AbstractPsrBridgeAdapterTest extends TestCase
      */
     public function testGetServiceWillThrowAdapterException(): void
     {
-        /** @var AbstractPsrBridgeAdapter|MockObject $adapter */
-        $adapter = $this->getMockForAbstractClass(AbstractPsrBridgeAdapter::class, [$this->container]);
+        /** @var AbstractPsrAdapter|MockObject $adapter */
+        $adapter = $this->getMockForAbstractClass(AbstractPsrAdapter::class, [$this->container]);
 
         $name = 'FooService';
 

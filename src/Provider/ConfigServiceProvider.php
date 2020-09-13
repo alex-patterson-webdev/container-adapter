@@ -70,7 +70,7 @@ final class ConfigServiceProvider implements ServiceProviderInterface
 
     /**
      * @param ContainerAdapterInterface $adapter
-     * @param array                      $factories
+     * @param array                     $factories
      *
      * @throws NotSupportedException
      * @throws ServiceProviderException
@@ -84,16 +84,6 @@ final class ConfigServiceProvider implements ServiceProviderInterface
             }
 
             if (is_string($factory)) {
-                if (!$adapter instanceof FactoryClassAwareInterface) {
-                    throw new NotSupportedException(
-                        sprintf(
-                            'The adapter \'%s\' does not support the registration of string factory classes \'%s\'',
-                            get_class($adapter),
-                            $factory
-                        )
-                    );
-                }
-
                 $this->registerStringFactory($adapter, $name, $factory);
                 continue;
             }
@@ -158,7 +148,7 @@ final class ConfigServiceProvider implements ServiceProviderInterface
             $adapter->setFactory($serviceName, $factory);
         } catch (AdapterException $e) {
             throw new ServiceProviderException(
-                sprintf('Failed to set callable factory for service \'%s\': %s', $serviceName, $e->getMessage()),
+                sprintf('Failed to register service \'%s\': %s', $serviceName, $e->getMessage()),
                 $e->getCode(),
                 $e
             );
@@ -185,22 +175,18 @@ final class ConfigServiceProvider implements ServiceProviderInterface
     ): void {
         $factory = $factoryConfig[0] ?? null;
 
-        if (null === $factory) {
-            throw new ServiceProviderException(
-                sprintf('The factory configuration array for service \'%s\' is invalid', $serviceName)
-            );
-        }
+        if (null !== $factory) {
+            $methodName = $factoryConfig[1] ?? '__invoke';
 
-        $methodName = $factoryConfig[1] ?? '__invoke';
+            if (is_string($factory)) {
+                $this->registerStringFactory($adapter, $serviceName, $factory, $methodName);
+                return;
+            }
 
-        if (is_string($factory)) {
-            $this->registerStringFactory($adapter, $serviceName, $factory, $methodName);
-            return;
-        }
-
-        if (is_object($factory) || is_callable($factory)) {
-            $this->registerFactory($adapter, $serviceName, $factory, $methodName);
-            return;
+            if (is_object($factory) || is_callable($factory)) {
+                $this->registerFactory($adapter, $serviceName, $factory, $methodName);
+                return;
+            }
         }
 
         throw new ServiceProviderException(
@@ -228,14 +214,16 @@ final class ConfigServiceProvider implements ServiceProviderInterface
         if (!$adapter instanceof FactoryClassAwareInterface) {
             throw new NotSupportedException(
                 sprintf(
-                    'The adapter class \'%s\' does not support factory class registration for service \'%s\'',
+                    'Failed to register service \'%s\': The adapter class \'%s\' does not support factory \'%s\' '
+                    . 'which is of type \'string\'.'
+                    . 'The adapter must implement \'%s\' in order to support registration \'string\' factory types',
                     get_class($adapter),
-                    $serviceName
+                    $serviceName,
+                    $factory,
+                    FactoryClassAwareInterface::class
                 )
             );
         }
-
-        $methodName ??= '__invoke';
 
         try {
             $adapter->setFactoryClass($serviceName, $factory, $methodName);

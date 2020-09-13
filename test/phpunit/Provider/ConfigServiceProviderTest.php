@@ -7,6 +7,7 @@ namespace ArpTest\Container\Provider;
 use Arp\Container\Adapter\AliasAwareInterface;
 use Arp\Container\Adapter\ContainerAdapterInterface;
 use Arp\Container\Adapter\Exception\AdapterException;
+use Arp\Container\Adapter\FactoryClassAwareInterface;
 use Arp\Container\Factory\ServiceFactoryInterface;
 use Arp\Container\Provider\ConfigServiceProvider;
 use Arp\Container\Provider\Exception\NotSupportedException;
@@ -81,37 +82,6 @@ final class ConfigServiceProviderTest extends TestCase
     }
 
     /**
-     * Assert that a NotSupportedException will be thrown if we try to set a string factory class with an adapter
-     * that does not implement FactoryClassAwareInterface
-     *
-     * @throws ServiceProviderException
-     */
-    public function testUsingStringFactoryWithNonFactoryClassAwareAdapterWillThrowNotSupportedException(): void
-    {
-        $name = 'FooService';
-        $service = \stdClass::class;
-
-        $serviceProvider = new ConfigServiceProvider(
-            [
-                'factories' => [
-                    $name => $service,
-                ],
-            ]
-        );
-
-        $this->expectException(NotSupportedException::class);
-        $this->expectExceptionMessage(
-            sprintf(
-                'The adapter \'%s\' does not support the registration of string factory classes \'%s\'',
-                get_class($this->adapter),
-                $service
-            )
-        );
-
-        $serviceProvider->registerServices($this->adapter);
-    }
-
-    /**
      * Assert that invalid factories will raise a ServiceProviderException
      *
      * @throws ServiceProviderException
@@ -167,11 +137,7 @@ final class ConfigServiceProviderTest extends TestCase
         $this->expectException(ServiceProviderException::class);
         $this->expectExceptionCode($exceptionCode);
         $this->expectExceptionMessage(
-            sprintf(
-                'Failed to set callable factory for service \'%s\': %s',
-                $serviceName,
-                $exceptionMessage
-            ),
+            sprintf('Failed to register service \'%s\': %s', $serviceName, $exceptionMessage),
         );
 
         (new ConfigServiceProvider($config))->registerServices($this->adapter);
@@ -226,6 +192,27 @@ final class ConfigServiceProviderTest extends TestCase
         (new ConfigServiceProvider($config))->registerServices($adapter);
     }
 
+    /**
+     * @throws NotSupportedException
+     * @throws ServiceProviderException
+     */
+    public function testRegisterServicesWillThrowServiceProviderExceptionIfTheArrayServiceIsInvalid(): void
+    {
+        $serviceName = 'FooService';
+
+        $config = [
+            'factories' => [
+                $serviceName => [],
+            ],
+        ];
+
+        $this->expectException(ServiceProviderException::class);
+        $this->expectExceptionMessage(
+            sprintf('Failed to register service \'%s\': The provided array configuration is invalid', $serviceName)
+        );
+
+        (new ConfigServiceProvider($config))->registerServices($this->adapter);
+    }
 
     /**
      * Assert that register services will correctly register the provided services and factories defined in $config.
@@ -331,5 +318,41 @@ final class ConfigServiceProviderTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    /**
+     * Assert that a NotSupportedException is thrown when passing a string factory configuration to a adapter that
+     * does not implement FactoryClassAwareInterface
+     *
+     * @throws NotSupportedException
+     * @throws ServiceProviderException
+     */
+    public function testNotSupportExceptionIsThrownIsStringFactoryIsNotSupportedByTheAdapter(): void
+    {
+        $serviceName = 'Test123';
+        $factoryName = \stdClass::class;
+        $config = [
+            'factories' => [
+                $serviceName => $factoryName,
+            ]
+        ];
+
+        $serviceProvider = new ConfigServiceProvider($config);
+
+        $this->expectException(NotSupportedException::class);
+        $this->expectExceptionMessage(
+            sprintf(
+                'Failed to register service \'%s\': The adapter class \'%s\' does not support factory \'%s\' '
+                . 'which is of type \'string\'.'
+                . 'The adapter must implement \'%s\' in order to support registration \'string\' factory types',
+                get_class($this->adapter),
+                $serviceName,
+                $factoryName,
+                FactoryClassAwareInterface::class
+            )
+        );
+
+        // We provide an adapter mock that is doe NOT implement FactoryClassAwareInterface
+        $serviceProvider->registerServices($this->adapter);
     }
 }
