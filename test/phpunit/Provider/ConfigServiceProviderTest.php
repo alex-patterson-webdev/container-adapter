@@ -355,4 +355,28 @@ final class ConfigServiceProviderTest extends TestCase
         // We provide an adapter mock that is doe NOT implement FactoryClassAwareInterface
         $serviceProvider->registerServices($this->adapter);
     }
+
+    /**
+     * Assert that the ServiceProvider supports string factory registration
+     *
+     * @throws NotSupportedException
+     * @throws ServiceProviderException
+     */
+    public function testRegistrationOfStringFactories(): void
+    {
+        $serviceName = 'Test123';
+        $factoryName = \stdClass::class;
+        $config = [
+            'factories' => [
+                $serviceName => $factoryName,
+            ]
+        ];
+
+        $this->adapter->expects($this->once())
+            ->method('setFactoryClass')
+            ->with($serviceName, $factoryName, null);
+
+        // We provide an adapter mock that is doe NOT implement FactoryClassAwareInterface
+        (new ConfigServiceProvider($config))->registerServices($this->adapter);
+    }
 }
