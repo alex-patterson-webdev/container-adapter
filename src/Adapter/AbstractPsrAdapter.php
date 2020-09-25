@@ -61,8 +61,10 @@ abstract class AbstractPsrAdapter implements ContainerAdapterInterface
         try {
             return $this->container->get($name);
         } catch (NotFoundExceptionInterface $e) {
+            /** @var \Throwable|NotFoundExceptionInterface */
             throw new NotFoundException($e->getMessage(), $e->getCode(), $e);
         } catch (ContainerExceptionInterface $e) {
+            /** @var \Throwable|ContainerExceptionInterface */
             throw new AdapterException($e->getMessage(), $e->getCode(), $e);
         }
     }

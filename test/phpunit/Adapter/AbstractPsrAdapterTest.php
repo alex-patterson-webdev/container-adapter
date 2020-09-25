@@ -20,7 +20,7 @@ use Psr\Container\ContainerInterface;
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package ArpTest\Container\Adapter
  */
-final class AbstractPsrBridgeAdapterTest extends TestCase
+final class AbstractPsrAdapterTest extends TestCase
 {
     /**
      * @var ContainerInterface|MockObject

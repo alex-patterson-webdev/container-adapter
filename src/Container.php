@@ -45,6 +45,8 @@ final class Container implements ContainerInterface
      * @return bool
      *
      * @throws Exception\ContainerException If the operation cannot be completed
+     *
+     * @noinspection PhpMissingParamTypeInspection Not currently part of PSR-11 specification
      */
     public function has($name): bool
     {
@@ -64,6 +66,8 @@ final class Container implements ContainerInterface
      *
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
+     *
+     * @noinspection PhpMissingParamTypeInspection Not currently part of PSR-11 specification
      */
     public function get($name)
     {
