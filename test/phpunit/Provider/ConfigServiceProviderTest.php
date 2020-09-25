@@ -8,7 +8,6 @@ use Arp\Container\Adapter\AliasAwareInterface;
 use Arp\Container\Adapter\ContainerAdapterInterface;
 use Arp\Container\Adapter\Exception\AdapterException;
 use Arp\Container\Adapter\FactoryClassAwareInterface;
-use Arp\Container\Factory\ServiceFactoryInterface;
 use Arp\Container\Provider\ConfigServiceProvider;
 use Arp\Container\Provider\Exception\NotSupportedException;
 use Arp\Container\Provider\Exception\ServiceProviderException;
@@ -301,17 +300,6 @@ final class ConfigServiceProviderTest extends TestCase
                         'FooService' => new \stdClass(),
                         'BarService' => new \stdClass(),
                         'Baz'        => 123,
-                    ],
-                ],
-            ],
-
-            [
-                [
-                    'factories' => [
-                        'BazStringService' => $this->getMockForAbstractClass(ServiceFactoryInterface::class),
-                        'Bar'              => static function () {
-                            return 'Test';
-                        },
                     ],
                 ],
             ],
