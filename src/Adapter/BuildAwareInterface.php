@@ -18,9 +18,9 @@ interface BuildAwareInterface extends ContainerAdapterInterface
      * @param string $name    The name of the service to create
      * @param array  $options The service's creation options
      *
-     * @return mixed
+     * @return BuildAwareInterface|$this
      *
      * @throws AdapterException If the service cannot be created
      */
-    public function build(string $name, array $options = []);
+    public function build(string $name, array $options = []): BuildAwareInterface;
 }

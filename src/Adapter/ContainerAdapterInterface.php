@@ -42,9 +42,11 @@ interface ContainerAdapterInterface
      * @param string $name    The name of the service to set.
      * @param mixed  $service The service to register.
      *
+     * @return ContainerAdapterInterface|$this
+     *
      * @throws AdapterException
      */
-    public function setService(string $name, $service);
+    public function setService(string $name, $service): ContainerAdapterInterface;
 
     /**
      * Register a callable factory for the container.
@@ -52,7 +54,9 @@ interface ContainerAdapterInterface
      * @param string   $name    The name of the service to register.
      * @param callable $factory The factory callable responsible for creating the service.
      *
+     * @return ContainerAdapterInterface|$this
+     *
      * @throws AdapterException
      */
-    public function setFactory(string $name, callable $factory);
+    public function setFactory(string $name, callable $factory): ContainerAdapterInterface;
 }
