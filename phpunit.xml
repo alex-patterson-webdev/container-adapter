@@ -1,15 +1,29 @@
-<phpunit bootstrap="./vendor/autoload.php" colors="true">
-
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        bootstrap="./vendor/autoload.php"
+        verbose="true"
+        beStrictAboutOutputDuringTests="true"
+        beStrictAboutTestsThatDoNotTestAnything="true"
+        beStrictAboutTodoAnnotatedTests="true"
+        colors="true"
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+>
+    <coverage processUncoveredFiles="false">
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <report>
+            <clover outputFile="clover.xml"/>
+        </report>
+    </coverage>
     <testsuites>
-        <testsuite name="Container">
-            <directory>./test</directory>
+        <testsuite name="unit">
+            <directory>./test/phpunit</directory>
+        </testsuite>
+        <testsuite name="integration">
+            <directory>./test/integration</directory>
         </testsuite>
     </testsuites>
-
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="false">
-            <directory suffix=".php">src</directory>
-        </whitelist>
-    </filter>
-
+    <logging/>
 </phpunit>

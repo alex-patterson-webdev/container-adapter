@@ -16,11 +16,11 @@ interface AliasAwareInterface extends ContainerAdapterInterface
      * Set an alias for a given service
      *
      * @param string $alias The name of the alias to set
-     * @param string $name The name of the service that
+     * @param string $name  The name of the service that
      *
-     * @return ContainerAdapterInterface
+     * @return AliasAwareInterface|$this
      *
      * @throws  AdapterException If the alias cannot be set
      */
-    public function setAlias(string $alias, string $name): ContainerAdapterInterface;
+    public function setAlias(string $alias, string $name): AliasAwareInterface;
 }

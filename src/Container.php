@@ -13,7 +13,6 @@ use Arp\Container\Provider\ServiceProviderInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
@@ -24,21 +23,14 @@ final class Container implements ContainerInterface
     /**
      * @var ContainerAdapterInterface
      */
-    private $adapter;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private ContainerAdapterInterface $adapter;
 
     /**
      * @param ContainerAdapterInterface $adapter
-     * @param LoggerInterface $logger
      */
-    public function __construct(ContainerAdapterInterface $adapter, LoggerInterface $logger)
+    public function __construct(ContainerAdapterInterface $adapter)
     {
         $this->adapter = $adapter;
-        $this->logger = $logger;
     }
 
     /**
@@ -53,17 +45,15 @@ final class Container implements ContainerInterface
      * @return bool
      *
      * @throws Exception\ContainerException If the operation cannot be completed
+     *
+     * @noinspection PhpMissingParamTypeInspection Not currently part of PSR-11 specification
      */
     public function has($name): bool
     {
         try {
             return $this->adapter->hasService($name);
         } catch (AdapterException $e) {
-            $errorMessage = sprintf('The has() failed for service \'%s\' : %s', $name, $e->getMessage());
-
-            $this->logger->debug($errorMessage, ['exception' => $e, 'name' => $name]);
-
-            throw new Exception\ContainerException($errorMessage, $e->getCode(), $e);
+            throw new Exception\ContainerException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -76,23 +66,17 @@ final class Container implements ContainerInterface
      *
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
+     *
+     * @noinspection PhpMissingParamTypeInspection Not currently part of PSR-11 specification
      */
     public function get($name)
     {
         try {
             return $this->adapter->getService($name);
         } catch (NotFoundException $e) {
-            $errorMessage = sprintf('The service \'%s\' could not be found', $name);
-
-            $this->logger->error($errorMessage, ['exception' => $e, 'name' => $name]);
-
-            throw new Exception\NotFoundException($errorMessage, $e->getCode(), $e);
+            throw new Exception\NotFoundException($e->getMessage(), $e->getCode(), $e);
         } catch (AdapterException $e) {
-            $errorMessage = sprintf('The get() failed for service \'%s\' : %s', $name, $e->getMessage());
-
-            $this->logger->error($errorMessage, ['exception' => $e, 'name' => $name]);
-
-            throw new Exception\ContainerException($errorMessage, $e->getCode(), $e);
+            throw new Exception\ContainerException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -101,22 +85,22 @@ final class Container implements ContainerInterface
      *
      * @param ServiceProviderInterface $serviceProvider
      *
-     * @return self
-     *
      * @throws ContainerException
      */
-    public function registerServices(ServiceProviderInterface $serviceProvider): self
+    public function registerServices(ServiceProviderInterface $serviceProvider): void
     {
         try {
             $serviceProvider->registerServices($this->adapter);
         } catch (ServiceProviderException $e) {
-            $errorMessage = sprintf('Failed to register service provider : %s', $e->getMessage());
-
-            $this->logger->error($errorMessage, ['exception' => $e, 'serviceProvider' => get_class($serviceProvider)]);
-
-            throw new ContainerException($errorMessage, $e->getCode(), $e);
+            throw new ContainerException(
+                sprintf(
+                    'Failed to register service provider \'%s\': %s',
+                    get_class($serviceProvider),
+                    $e->getMessage()
+                ),
+                $e->getCode(),
+                $e
+            );
         }
-
-        return $this;
     }
 }

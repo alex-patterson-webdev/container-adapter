@@ -8,7 +8,7 @@ namespace Arp\Container\Adapter\Exception;
  * @author  Alex Patterson <alex.patterson.webdev@gmail.com>
  * @package Arp\Container\Adapter\Exception
  */
-final class NotFoundException extends RuntimeException
+class InvalidArgumentException extends AdapterException
 {
 
 }
